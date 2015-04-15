@@ -1,12 +1,18 @@
+#todo binned barplot method where you give the x and y values and the data
+#todo scatter plot thing where you give the data, x and y values
+
 n.terminal.raw = read.csv("C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\n_terminal_data_with_full_seq.csv")
 
 results.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\'
+
+generations = 9
 
 #promoter data sets
 
 n.terminal.tai.high.prom = n.terminal.raw[which(n.terminal.raw[,'Promoter.Display'] == 'High'),]
 
 n.terminal.tai.low.prom = n.terminal.raw[which(n.terminal.raw[,'Promoter.Display'] == 'Low'),]
+
 
 #RBS data sets
 
@@ -40,6 +46,7 @@ wilcox.test(n.terminal.raw[which(n.terminal.raw[,'Promoter.Display'] == 'High'),
 median(n.terminal.raw[which(n.terminal.raw[,'Promoter.Display'] == 'High'),'Count.DNA'],na.rm = TRUE)/
   median(n.terminal.raw[which(n.terminal.raw[,'Promoter.Display'] == 'Low'),'Count.DNA'],na.rm = TRUE)
 
+get.growth.rate.difference(mean(n.terminal.tai.high.prom[,'Count.DNA'],na.rm = TRUE)/mean( n.terminal.tai.low.prom[,'Count.DNA'],na.rm = TRUE)  ,generations)
 
 
 #RBSs
@@ -59,17 +66,33 @@ wilcox.test(n.terminal.raw[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Co
             n.terminal.raw[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'Count.DNA'],
             alternative = 'less')
 
-1- median(n.terminal.raw[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)/
+median(n.terminal.raw[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)/
   median(n.terminal.raw[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'Count.DNA'],na.rm = TRUE)
+
+
+get.growth.rate.difference(mean(n.terminal.tai.strong.rbs[,'Count.DNA'],na.rm = TRUE)/mean( n.terminal.tai.weak.rbs[,'Count.DNA'],na.rm = TRUE)  ,generations)
 
 
 wilcox.test(n.terminal.raw[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA'],
             n.terminal.raw[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'Count.DNA'],
             alternative = 'less')
 
-1- median(n.terminal.raw[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA'],na.rm = TRUE)/
+median(n.terminal.raw[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA'],na.rm = TRUE)/
   median(n.terminal.raw[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'Count.DNA'],na.rm = TRUE)
 
+
+get.growth.rate.difference(mean(n.terminal.tai.mid.rbs[,'Count.DNA'],na.rm = TRUE)/mean( n.terminal.tai.weak.rbs[,'Count.DNA'],na.rm = TRUE)  ,generations)
+
+
+wilcox.test(n.terminal.raw[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Count.DNA'],
+            n.terminal.raw[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA'],
+            alternative = 'less')
+
+median(n.terminal.raw[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)/
+  median(n.terminal.raw[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA'],na.rm = TRUE)
+
+
+get.growth.rate.difference(mean(n.terminal.tai.weak.rbs[,'Count.DNA'],na.rm = TRUE)/mean( n.terminal.tai.mid.rbs[,'Count.DNA'],na.rm = TRUE)  ,generations)
 
 
 #RBSs and promoters
@@ -95,50 +118,47 @@ wilcox.test(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Displa
             n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Weak'),'Count.DNA'],
             alternative = 'less')
 
-1-median(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)/
+median(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)/
   median(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Weak'),'Count.DNA'],na.rm = TRUE)
+
+get.growth.rate.difference(mean(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)/
+                             mean( n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Weak'),'Count.DNA'],na.rm = TRUE)  ,generations)
+
+
+wilcox.test(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],
+            n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Mid'),'Count.DNA'],
+            alternative = 'less')
+
+median(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)/
+  median(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Mid'),'Count.DNA'],na.rm = TRUE)
+
+get.growth.rate.difference(mean(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)/
+                             mean( n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Mid'),'Count.DNA'],na.rm = TRUE)  ,generations)
 
 wilcox.test(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Mid'),'Count.DNA'],
             n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Weak'),'Count.DNA'],
             alternative = 'less')
 
-1-median(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)/
+median(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Mid'),'Count.DNA'],na.rm = TRUE)/
   median(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Weak'),'Count.DNA'],na.rm = TRUE)
+
+get.growth.rate.difference(mean(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Mid'),'Count.DNA'],na.rm = TRUE)/
+                             mean( n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Weak'),'Count.DNA'],na.rm = TRUE)  ,generations)
 
 
 wilcox.test(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],
             n.terminal.tai.low.prom[which(n.terminal.tai.low.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],
             alternative = 'less')
 
-1-median(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)/
+median(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)/
   median(n.terminal.tai.low.prom[which(n.terminal.tai.low.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)
-
-
-wilcox.test(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],
-            n.terminal.tai.low.prom[which(n.terminal.tai.low.prom[,'RBS.Display'] == 'Weak'),'Count.DNA'],
-            alternative = 'less')
-
-1-median(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)/
-  median(n.terminal.tai.low.prom[which(n.terminal.tai.low.prom[,'RBS.Display'] == 'Weak'),'Count.DNA'],na.rm = TRUE)
-
 
 wilcox.test(n.terminal.tai.low.prom[which(n.terminal.tai.low.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],
             n.terminal.tai.low.prom[which(n.terminal.tai.low.prom[,'RBS.Display'] == 'Weak'),'Count.DNA'],
             alternative = 'less')
 
-1-median(n.terminal.tai.low.prom[which(n.terminal.tai.low.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)/
+median(n.terminal.tai.low.prom[which(n.terminal.tai.low.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],na.rm = TRUE)/
   median(n.terminal.tai.low.prom[which(n.terminal.tai.low.prom[,'RBS.Display'] == 'Weak'),'Count.DNA'],na.rm = TRUE)
-
-
-wilcox.test(n.terminal.tai.low.prom[which(n.terminal.tai.low.prom[,'RBS.Display'] == 'Mid'),'Count.DNA'],
-            n.terminal.tai.low.prom[which(n.terminal.tai.low.prom[,'RBS.Display'] == 'Weak'),'Count.DNA'],
-            alternative = 'less')
-
-1-median(n.terminal.tai.low.prom[which(n.terminal.tai.low.prom[,'RBS.Display'] == 'Mid'),'Count.DNA'],na.rm = TRUE)/
-  median(n.terminal.tai.low.prom[which(n.terminal.tai.low.prom[,'RBS.Display'] == 'Weak'),'Count.DNA'],na.rm = TRUE)
-
-
-
 
 
 #cds types coverage
@@ -165,12 +185,19 @@ wilcox.test(n.terminal.raw[which(n.terminal.raw[,'CDS.type'] == 'Max Rare'),'Cou
 1-median(n.terminal.raw[which(n.terminal.raw[,'CDS.type'] == 'Max Rare'),'Count.DNA'],na.rm = TRUE)/
   median(n.terminal.raw[which(n.terminal.raw[,'CDS.type'] == 'Min Rare'),'Count.DNA'],na.rm = TRUE)
 
+get.growth.rate.difference(mean(n.terminal.raw[which(n.terminal.raw[,'CDS.type'] == 'Max Rare'),'Count.DNA'],na.rm = TRUE)/
+                             mean(n.terminal.raw[which(n.terminal.raw[,'CDS.type'] == 'Min Rare'),'Count.DNA'],na.rm = TRUE)  ,generations)
+
+
 wilcox.test(n.terminal.raw[which(n.terminal.raw[,'CDS.type'] == "גˆ†G 10"),'Count.DNA'],
             n.terminal.raw[which(n.terminal.raw[,'CDS.type'] == 'גˆ†G 1'),'Count.DNA'],
             alternative = 'less')
 
 1-median(n.terminal.raw[which(n.terminal.raw[,'CDS.type'] == 'גˆ†G 10'),'Count.DNA'],na.rm = TRUE)/
   median(n.terminal.raw[which(n.terminal.raw[,'CDS.type'] == 'גˆ†G 1'),'Count.DNA'],na.rm = TRUE)
+
+get.growth.rate.difference(mean(n.terminal.raw[which(n.terminal.raw[,'CDS.type'] == 'Max Rare'),'Count.DNA'],na.rm = TRUE)/
+                             mean(n.terminal.raw[which(n.terminal.raw[,'CDS.type'] == 'Min Rare'),'Count.DNA'],na.rm = TRUE)  ,generations)
 
 
 #tai
@@ -198,7 +225,7 @@ for (i in 1:length(n.term.cut.tai)){
 
 png(paste0(results.dir,'DNA_coverage_per_tai_level_unflitered.png'),units="in", width=15, height=8.5, res=100)
 
-barplot(n.term.dna.sum.tai/tai.hist$counts,ylim = c(0,3500), ylab = 'DNA coverage normalized by number of variants at TAI level', xlab = 'TAI',
+barplot(n.term.dna.sum.tai/tai.hist$counts,ylim = c(0,3100), ylab = 'DNA coverage normalized by number of variants at TAI level', xlab = 'TAI',
         main = 'DNA coverage per level of TAI normalized to ammount of varaints at TAI level')
 dev.off()
 
@@ -415,6 +442,8 @@ cor(n.terminal.tai.wt.rbs[,'GC'],n.terminal.tai.wt.rbs[,'Count.DNA'], method ='s
 
 png(paste0(results.dir,'DNA_coverage_vs_gc_by_RBS_and_promoter_unflitered.png'),units="in", width=20, height=15, res=100)
 par(mfrow = c(4,2))
+
+
 plot(n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Strong'),'GC'],n.terminal.tai.high.prom[which(n.terminal.tai.high.prom[,'RBS.Display'] == 'Strong'),'Count.DNA'],log = 'y'
      ,main = 'Strong RBS and High Promoter',ylab = 'Log DNA Coverage', xlab = 'Average GC content of variable region'
      ,xlim = c(min(n.terminal.raw[,'GC']),max(n.terminal.raw[,'GC']))
@@ -518,6 +547,7 @@ for (i in 1:length(n.term.cut.deltag)){
   if (is.na(n.terminal.raw[,'Count.DNA'][i])){
     current = 0
   } else {
+    
     current = n.terminal.raw[,'Count.DNA'][i]
   }
   
@@ -602,85 +632,168 @@ dev.off()
 
 png(paste0(results.dir,'DNA_coverage_vs_delta_G_by_RBS_and_promoter_unflitered.png'),units="in", width=20, height=15, res=100)
 par(mfrow = c(4,2))
-plot(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'dG'],log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Count.DNA'])
+plot(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'dG'],n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Count.DNA']
      ,main = 'Strong RBS and High Promoter',ylab = 'Log DNA Coverage', xlab = 'Average delta G of variable region'
      ,xlim = c(min(n.terminal.raw[,'dG']),max(n.terminal.raw[,'dG']))
-     ,ylim = c(log10(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)),log10(max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)))
-     ,col="#00000080")
+     ,ylim = c(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE),max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE))
+     ,col="#00000080", log = 'y')
 abline(lm(log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Count.DNA'])~
             n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'dG'])
                 ,col="red") # regression line (y~x) 
+text(-55,1000,paste('R^2 = ',
+                   round(summary(
+                     lm(log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Count.DNA'])~
+                                               n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'dG']))$adj.r.squared
+                         ,2), '\nCorrelation = ', 
+                   round(cor(log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Count.DNA']),
+                       n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'dG']
+                       ,use = 'na.or.complete',method = 'spearman'),2))
+     , col = 'red')
 
 plot(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'dG'],
-     log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA'])
+     n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA']
      ,main = 'Mid RBS and High Promoter',ylab = 'Log DNA Coverage', xlab = 'Average delta G of variable region'
      ,xlim = c(min(n.terminal.raw[,'dG']),max(n.terminal.raw[,'dG']))
-     ,ylim = c(log10(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)),log10(max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)))
-     ,col="#00000080")
+     ,ylim = c(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE),max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE))
+     ,col="#00000080", log = 'y')
 abline(lm(log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA'])~
             n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'dG'])
        ,col="red") # regression line (y~x) 
 
+text(-55,1000,paste('R^2 = ',
+                   round(summary(
+                     lm(log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA'])~
+                          n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'dG']))$adj.r.squared
+                     ,2), '\nCorrelation = ', 
+                   round(cor(log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA']),
+                             n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'dG']
+                             ,use = 'na.or.complete',method = 'spearman'),2))
+     , col = 'red')
+
+
 plot(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'dG']
-     ,log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'Count.DNA'])
+     ,n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'Count.DNA']
      ,main = 'Weak RBS and High Promoter',ylab = 'Log DNA Coverage', xlab = 'Average delta G of variable region'
      ,xlim = c(min(n.terminal.raw[,'dG']),max(n.terminal.raw[,'dG']))
-     ,ylim = c(log10(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)),log10(max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)))
-     ,col="#00000080")
+     ,ylim = c(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE),max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE))
+     ,col="#00000080", log = 'y')
 abline(lm(log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'Count.DNA'])~
             n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'dG'])
        ,col="red") # regression line (y~x) 
 
+text(-55,1000,paste('R^2 = ',
+                   round(summary(
+                     lm(log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'Count.DNA'])~
+                          n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'dG']))$adj.r.squared
+                     ,2), '\nCorrelation = ', 
+                   round(cor(log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'Count.DNA']),
+                             n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'dG']
+                             ,use = 'na.or.complete',method = 'spearman'),2))
+     , col = 'red')
+
+
+
 plot(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'dG']
-     ,log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'Count.DNA'])
+     ,n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'Count.DNA']
      ,main = 'WT RBS and High Promoter',ylab = 'Log DNA Coverage', xlab = 'Average delta G of variable region'
      ,xlim = c(min(n.terminal.raw[,'dG']),max(n.terminal.raw[,'dG']))
-     ,ylim = c(log10(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)),log10(max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)))
-     ,col="#00000080")
+     ,ylim = c(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE),max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE))
+     ,col="#00000080",log = 'y')
 abline(lm(log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'Count.DNA'])~
             n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'dG'])
        ,col="red") # regression line (y~x) 
 
+
+text(-55,1000,paste('R^2 = ',
+                   round(summary(
+                     lm(log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'Count.DNA'])~
+                          n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'dG']))$adj.r.squared
+                     ,2), '\nCorrelation = ', 
+                   round(cor(log10(n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'Count.DNA']),
+                             n.terminal.tai.high.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'dG']
+                             ,use = 'na.or.complete',method = 'spearman'),2))
+     , col = 'red')
+
+
 plot(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'dG'],
-     log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Count.DNA'])
+     n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Count.DNA']
      ,main = 'Strong RBS and Low Promoter',ylab = 'Log DNA Coverage', xlab = 'Average delta G of variable region'
      ,xlim = c(min(n.terminal.raw[,'dG']),max(n.terminal.raw[,'dG']))
-     ,ylim = c(log10(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)),log10(max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)))
-     ,col="#00000080")
+     ,ylim = c(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE),max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE))
+     ,col="#00000080", log= 'y')
 abline(lm(log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Count.DNA'])~
             n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'dG'])
        ,col="red") # regression line (y~x) 
 
+text(-55,1000,paste('R^2 = ',
+                   round(summary(
+                     lm(log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Count.DNA'])~
+                          n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'dG']))$adj.r.squared
+                     ,2), '\nCorrelation = ', 
+                   round(cor(log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'Count.DNA']),
+                             n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Strong'),'dG']
+                             ,use = 'na.or.complete',method = 'spearman'),2))
+     , col = 'red')
+
 plot(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'dG'],
-     log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA'])
+     n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA']
      ,main = 'Mid RBS and Low Promoter',ylab = 'Log DNA Coverage', xlab = 'Average delta G of variable region'
      ,xlim = c(min(n.terminal.raw[,'dG']),max(n.terminal.raw[,'dG']))
-     ,ylim = c(log10(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)),log10(max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)))
-     ,col="#00000080")
+     ,ylim = c(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE),max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE))
+     ,col="#00000080", log = 'y')
 abline(lm(log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA'])~
             n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'dG'])
        ,col="red") # regression line (y~x) 
+text(-55,1000,paste('R^2 = ',
+                   round(summary(
+                     lm(log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA'])~
+                          n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'dG']))$adj.r.squared
+                     ,2), '\nCorrelation = ', 
+                   round(cor(log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'Count.DNA']),
+                             n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Mid'),'dG']
+                             ,use = 'na.or.complete',method = 'spearman'),2))
+     , col = 'red')
+
 
 plot(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'dG'],
-     log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'Count.DNA'])
+     n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'Count.DNA']
      ,main = 'Weak RBS and Low Promoter',ylab = 'Log DNA Coverage', xlab = 'Average delta G of variable region'
      ,xlim = c(min(n.terminal.raw[,'dG']),max(n.terminal.raw[,'dG']))
-     ,ylim = c(log10(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)),log10(max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)))
-     ,col="#00000080")
+     ,ylim = c(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE),max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE))
+     ,col="#00000080", log = 'y')
 abline(lm(log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'Count.DNA'])~
             n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'dG'])
        ,col="red") # regression line (y~x) 
 
+text(-55,1000,paste('R^2 = ',
+                   round(summary(
+                     lm(log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'Count.DNA'])~
+                          n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'dG']))$adj.r.squared
+                     ,2), '\nCorrelation = ', 
+                   round(cor(log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'Count.DNA']),
+                             n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'Weak'),'dG']
+                             ,use = 'na.or.complete',method = 'spearman'),2))
+     , col = 'red')
+
+
 plot(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'dG'],
-     log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'Count.DNA'])
+     n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'Count.DNA']
      ,main = 'WT RBS and Low Promoter',ylab = 'Log DNA Coverage', xlab = 'Average delta G of variable region'
      ,xlim = c(min(n.terminal.raw[,'dG']),max(n.terminal.raw[,'dG']))
-     ,ylim = c(log10(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)),log10(max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE)))
-     ,col="#00000080")
+     ,ylim = c(min(n.terminal.raw[,'Count.DNA'],na.rm = TRUE),max(n.terminal.raw[,'Count.DNA'],na.rm = TRUE))
+     ,col="#00000080", log = 'y')
 abline(lm(log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'Count.DNA'])~
             n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'dG'])
        ,col="red") # regression line (y~x) 
-
+text(-55,1000,paste('R^2 = ',
+                   round(summary(
+                     lm(log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'Count.DNA'])~
+                          n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'dG']))$adj.r.squared
+                     ,2), '\nCorrelation = ', 
+                   round(cor(log10(n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'Count.DNA']),
+                             n.terminal.tai.low.prom[which(n.terminal.raw[,'RBS.Display'] == 'WT'),'dG']
+                             ,use = 'na.or.complete',method = 'spearman'),2))
+     , col = 'red')
 title("Log DNA coverage vs delta G for different RBS promoter pairs", outer = TRUE, line = -1)
 
 dev.off()
@@ -749,27 +862,12 @@ mtext("DNA coverage of rare vs common codon varaints of all promoters", side = 3
 dev.off()
 
 
-png(paste0(results.dir,"common_vs_rare_DNA_coverage_for_all_RBS_and_promoters.png"),units="in", width=8, height=15, res=100)
+png(paste0(results.dir,"common_vs_rare_DNA_coverage_for_all_RBS_and_promoters_w.png"),units="in", width=12, height=6, res=100)
 
-par(mfcol = c(4,2),oma = c(2,2,2,2))
+par(mfcol = c(2,4),oma = c(2,2,2,2))
 plot(c.2.r.matrix.high[which(c.2.r.matrix.high[,'RBS'] == 'Strong'),'Rare_DNA'],
      c.2.r.matrix.high[which(c.2.r.matrix.high[,'RBS'] == 'Strong'),'Common_DNA'],
      main = 'High Promoter Strong RBS', ylab = 'Common variant DNA coverage',
-     xlab = 'Rare variant DNA coverage', ylim = c(0,8000), xlim = c(0,8000))
-abline(0,1)
-plot(c.2.r.matrix.high[which(c.2.r.matrix.high[,'RBS'] == 'Mid'),'Rare_DNA'],
-     c.2.r.matrix.high[which(c.2.r.matrix.high[,'RBS'] == 'Mid'),'Common_DNA'],
-     main = 'High Promoter Mid RBS', ylab = 'Common variant DNA coverage',
-     xlab = 'Rare variant DNA coverage', ylim = c(0,8000), xlim = c(0,8000))
-abline(0,1)
-plot(c.2.r.matrix.high[which(c.2.r.matrix.high[,'RBS'] == 'Weak'),'Rare_DNA'],
-     c.2.r.matrix.high[which(c.2.r.matrix.high[,'RBS'] == 'Weak'),'Common_DNA'],
-     main = 'High Promoter Weak RBS', ylab = 'Common variant DNA coverage',
-     xlab = 'Rare variant DNA coverage', ylim = c(0,8000), xlim = c(0,8000))
-abline(0,1)
-plot(c.2.r.matrix.high[which(c.2.r.matrix.high[,'RBS'] == 'WT'),'Rare_DNA'],
-     c.2.r.matrix.high[which(c.2.r.matrix.high[,'RBS'] == 'WT'),'Common_DNA'],
-     main = 'High Promoter WT RBS', ylab = 'Common variant DNA coverage',
      xlab = 'Rare variant DNA coverage', ylim = c(0,8000), xlim = c(0,8000))
 abline(0,1)
 plot(c.2.r.matrix.low[which(c.2.r.matrix.low[,'RBS'] == 'Strong'),'Rare_DNA'],
@@ -777,14 +875,29 @@ plot(c.2.r.matrix.low[which(c.2.r.matrix.low[,'RBS'] == 'Strong'),'Rare_DNA'],
      main = 'Low Promoter Strong RBS', ylab = 'Common variant DNA coverage',
      xlab = 'Rare variant DNA coverage', ylim = c(0,8000), xlim = c(0,8000))
 abline(0,1)
+plot(c.2.r.matrix.high[which(c.2.r.matrix.high[,'RBS'] == 'Mid'),'Rare_DNA'],
+     c.2.r.matrix.high[which(c.2.r.matrix.high[,'RBS'] == 'Mid'),'Common_DNA'],
+     main = 'High Promoter Mid RBS', ylab = 'Common variant DNA coverage',
+     xlab = 'Rare variant DNA coverage', ylim = c(0,8000), xlim = c(0,8000))
+abline(0,1)
 plot(c.2.r.matrix.low[which(c.2.r.matrix.low[,'RBS'] == 'Mid'),'Rare_DNA'],
      c.2.r.matrix.low[which(c.2.r.matrix.low[,'RBS'] == 'Mid'),'Common_DNA'],
      main = 'Low Promoter Mid RBS', ylab = 'Common variant DNA coverage',
      xlab = 'Rare variant DNA coverage', ylim = c(0,8000), xlim = c(0,8000))
 abline(0,1)
+plot(c.2.r.matrix.high[which(c.2.r.matrix.high[,'RBS'] == 'Weak'),'Rare_DNA'],
+     c.2.r.matrix.high[which(c.2.r.matrix.high[,'RBS'] == 'Weak'),'Common_DNA'],
+     main = 'High Promoter Weak RBS', ylab = 'Common variant DNA coverage',
+     xlab = 'Rare variant DNA coverage', ylim = c(0,8000), xlim = c(0,8000))
+abline(0,1)
 plot(c.2.r.matrix.low[which(c.2.r.matrix.low[,'RBS'] == 'Weak'),'Rare_DNA'],
      c.2.r.matrix.low[which(c.2.r.matrix.low[,'RBS'] == 'Weak'),'Common_DNA'],
      main = 'Low Promoter Weak RBS', ylab = 'Common variant DNA coverage',
+     xlab = 'Rare variant DNA coverage', ylim = c(0,8000), xlim = c(0,8000))
+abline(0,1)
+plot(c.2.r.matrix.high[which(c.2.r.matrix.high[,'RBS'] == 'WT'),'Rare_DNA'],
+     c.2.r.matrix.high[which(c.2.r.matrix.high[,'RBS'] == 'WT'),'Common_DNA'],
+     main = 'High Promoter WT RBS', ylab = 'Common variant DNA coverage',
      xlab = 'Rare variant DNA coverage', ylim = c(0,8000), xlim = c(0,8000))
 abline(0,1)
 plot(c.2.r.matrix.low[which(c.2.r.matrix.low[,'RBS'] == 'WT'),'Rare_DNA'],
