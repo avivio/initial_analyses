@@ -1,3 +1,5 @@
+require(ggplot2)
+require(GGally)
 ggpairs_identical_scales  <- function(data){
   plot_matrix  <- ggpairs(data)
   
@@ -24,3 +26,4 @@ ggpairs_identical_scales  <- function(data){
 
 
 
+plot_face <- ggpairs_identical_scales(select(fitseq_raw_data_norm_log1p_2_mismatches,A_28,B_28))

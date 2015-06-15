@@ -3,8 +3,7 @@
 require(tidyr)
 require(ggplot2)
 require(dplyr)
-require(scales)
-require(plotrix)
+
 
 result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\'
 
@@ -25,7 +24,10 @@ fitseq.data.tidy$RBS.Display <- factor(fitseq.data.tidy$RBS.Display,
                               levels = c("Strong", "Mid", "Weak", "WT"))
 
 #historgrams of normalized frequency + 1 log transformed for different day, rbs-promoter groups, and lineages,
-fitseq.data.tidy  <- fitseq.data.tidy %>% mutate(sum.freq = sum(frequency+1),norm.freq = (frequency+1)/sum.freq)
+fitseq.data.tidy  <- fitseq.data.tidy %>% 
+  group_by(day,lineage) %>%
+  mutate(sum.freq_1 = sum(frequency+1),norm.freq_1 = (frequency+1)/sum.freq_1,
+         sum.freq = sum(frequency),norm.freq = (frequency)/sum.freq)
 
 
 
