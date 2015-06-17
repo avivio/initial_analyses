@@ -35,53 +35,109 @@ fitseq.data.tidy <- fitseq.data.tidy %>%
          sum.sample.1= sum(frequency+1),norm.freq.1 = (frequency+1)/sum.sample.1,
          sum.anc.1= sum(anc_1+1),norm.anc.1 = (anc_1+1)/sum.anc.1,freq.norm.anc.1 = norm.freq.1/norm.anc.1)
 
-day.number = 12
-lineage.letter = 'C'
-fitseq.current.sample <-  fitseq.data.tidy %>% filter(day == day.number, lineage == lineage.letter)
+
+x.strings <- 
+  c('Rel.Codon.Freq','CAI','tAI','CDS.GC','dG','log2(salis.init)',
+    'TASEP.avgRiboNum',	'TASEP.density.0',	'TASEP.bottle.neck.position',	'TASEP.bottle.neck.depth')
+x.labels <- 
+  c('Relative codon frequency','CAI','tAI','Coding sequence GC %','Delta G','Log 2 RBS calculator initition rate',	
+    'Average ribosome number (calculated using TASEP)',	'Density at start codon (calculated using TASEP)',
+    'Bottle neck position (calculated using TASEP)','Bottle neck depth (calculated using TASEP)')
+
+names(x.labels) <- x.strings
 
 
-
-
-protein.fitness.lm <-  lm(freq.norm.anc.1 ~ Prot, data=fitseq.current.sample)
+protein.fitness.lm <-  lm(freq.norm.anc.1 ~ Prot, data=fitseq.data.tidy)
 protein.fitness.coeffs <- coefficients(protein.fitness.lm)
 
-fitseq.data.prediction <- fitseq.current.sample %>% 
+fitseq.data.prediction <- fitseq.data.tidy  %>% 
   mutate(prediction =protein.fitness.coeffs[1] + protein.fitness.coeffs[2]*Prot,
          fit.resid = freq.norm.anc.1 -  prediction)
 
-fitseq.data.prediction <- fitseq.data.prediction %>% filter(fit.resid < 2) 
 
-fitseq.data.prediction.no.wt <- fitseq.data.prediction %>% 
+fitseq.data.models <- fitseq.data.tidy %>% 
+  group_by(lineage) %>% 
+  do(lin =  lm(freq.norm.anc.1 ~ Prot, data=.)) %>%
+  mutate(intercept = coefficients(lin)[1],slope = coefficients(lin)[2] ) %>%
+  select(-lin)
+
+
+fitseq.data.prediction <- left_join(fitseq.data.tidy,fitseq.data.models,by= 'lineage') %>% 
+  mutate(prediction =intercept + slope*Prot,
+         fit.resid = freq.norm.anc.1 -  prediction)
+
+
+
+fitseq.data.prediction <- fitseq.data.prediction %>% filter(fit.resid < 2.6) 
+y.limits <-  fitseq.data.prediction %>%
+  ungroup() %>%
+  summarise(min.y = min(fit.resid,na.rm = T),max.y = max(fit.resid,na.rm = T))
+y.limits <- c(y.limits$min.y,y.limits$max.y)
+
+result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\fitness_residuals\\'
+dir.create(result.dir)
+
+day.number = 12
+for (lineage.letter in c('A','B','C','D','E','F')){
+  print(lineage.letter)
+
+
+fitseq.current.sample <-  fitseq.data.prediction %>% filter(day == day.number, lineage == lineage.letter)
+
+fitseq.current.sample.no.wt <- fitseq.current.sample %>% 
   filter(RBS.Display!='WT')
 
-ggplot(fitseq.data.prediction, aes(fit.resid)) + 
+
+
+filename.all <- paste('all_fitness_residual_histogram_lineage', lineage.letter,'day', day.number,sep = '_' )
+
+title <- paste('Fitness residual histogram \nfor lineage', lineage.letter,'day', day.number)
+
+png(paste0(result.dir,filename.all,'.png'),units="in",  width=15, height=12, res=70)
+
+p <- ggplot(fitseq.current.sample, aes(fit.resid)) + 
   geom_histogram() + 
   theme_aviv +
   xlab('Fitness residuals') +
-  ggtitle(paste('Fitness residual histogram \nfor lineage', lineage.letter,'day', day.number))
+  ggtitle(title) +
+  expand_limits(y = c(0,3000))
+  
+
+print(p)
+dev.off()
+
+filename.rbs.promoter <- paste('rbs_promoter_fitness_residual_histogram_lineage', lineage.letter,'day', day.number,sep = '_' )
+
+png(paste0(result.dir,filename.rbs.promoter,'.png'),units="in",  width=15, height=12, res=70)
 
 
-ggplot(fitseq.data.prediction.no.wt, aes(fit.resid)) + 
+p <- ggplot(fitseq.current.sample.no.wt, aes(fit.resid)) + 
   geom_histogram() + 
   theme_aviv +
   xlab('Fitness residuals') +
   ggtitle(paste('Fitness residual histogram \nfor lineage', lineage.letter,'day', day.number)) +
-  facet_grid(Promoter.Display~RBS.Display)
+  facet_grid(Promoter.Display~RBS.Display)+
+  expand_limits(y = c(0,650))
 
 
-ggplot(fitseq.data.prediction, aes(y = log2(fit.resid),x = log2(salis.init))) + 
-  geom_point() + 
-  theme_aviv +
-  ylab('Log 2 fitness residuals') +
-  xlab('GC content') +
-  ggtitle(paste('Log 2 Fitness residuals vs GC content \nfor lineage', lineage.letter,'day', day.number)) 
+print(p)
+dev.off()
+
+y.string <-  'fit.resid'
+y.label <- 'Fitness Residual'
 
 
 
-ggplot(fitseq.data.prediction.no.wt, aes(y = log2(fit.resid),x = TASEP.avgRiboNum)) + 
-  geom_point() + 
-  theme_aviv +
-  ylab('Log 2 fitness residuals') +
-  xlab('GC content') +
-  ggtitle(paste('Log 2 Fitness residuals vs GC content \nfor lineage', lineage.letter,'day', day.number)) +
-  facet_grid(Promoter.Display~RBS.Display)
+
+for (i in 1:length(x.labels)){
+  x.string <- names(x.labels)[i]
+  x.label <- x.labels[i]
+  print(x.label)
+  filename <- paste(x.string ,'vs',y.string,'lineage',lineage.letter,sep = '_')
+  title <- paste(x.label ,'vs',y.label,'\n','lineage',lineage.letter,'day', day.number)
+  print.all.plots.for.x.and.y.goodman(result.dir,fitseq.current.sample,x.string,y.string,x.label,y.label,
+                                      filename,title,y.limits)
+  
+}
+
+}
