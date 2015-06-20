@@ -2,6 +2,38 @@ require(dplyr)
 require(tidyr)
 require(ggplot2)
 
+fitseq.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\goodman_salis_tuller_fitseq_2_mismatch_with_0.csv'
+fitseq.data = read.csv(fitseq.data.location)
+fitseq.data = transform(fitseq.data, Prot = as.numeric(as.character(Prot))
+                        ,Bin.Pct.1 = as.numeric(as.character((Bin.Pct.1))),
+                        Count.RNA = as.numeric(as.character((Count.RNA))))
+fitseq.data.tidy <- fitseq.data %>% select(-Count.A.DNA,-Count.A.RNA,-Count.B.DNA,-Count.B.RNA,
+                                           -Bin.1,-Bin.2,-Bin.3,-Bin.4,-Bin.5,-Bin.6,-Bin.7,
+                                           -Bin.8,-Bin.9,-Bin.10,-Bin.11,-Bin.12,-RNA.A,-RNA.B,
+                                           -Bin.Pct.1,-Bin.Pct.2,-Bin.Pct.3,-Bin.Pct.4,-Bin.Pct.5,
+                                           -Bin.Pct.6,-Bin.Pct.7,-Bin.Pct.8,-Bin.Pct.9,-Bin.Pct.10,
+                                           -Bin.Pct.11,-Bin.Pct.12,-Insuff.Prot,-Insuff.DNA,
+                                           -Insuff.RNA,-Fltr.BelowRange,-Fltr.AboveRange ,
+                                           -Fltr.SetGood,-full.seq)
+fitseq.data.tidy  <- fitseq.data.tidy %>%   gather(sample, frequency, A_24:F_0)
+fitseq.data.tidy  <- fitseq.data.tidy %>% separate(sample, c("lineage", "day"), '_',convert = T)
+fitseq.data.tidy$RBS.Display <- factor(fitseq.data.tidy$RBS.Display,
+                                       levels = c("Strong", "Mid", "Weak", "WT"))
+
+
+
+
+fitseq.data.tidy <- fitseq.data.tidy %>% 
+  group_by(day,lineage) %>% 
+  mutate(sum.sample= sum(frequency),norm.freq = frequency/sum.sample,
+         sum.anc= sum(anc_1),norm.anc = anc_1/sum.anc,freq.norm.anc = norm.freq/norm.anc,
+         sum.sample.1= sum(frequency+1),norm.freq.1 = (frequency+1)/sum.sample.1,
+         sum.anc.1= sum(anc_1+1),norm.anc.1 = (anc_1+1)/sum.anc.1,freq.norm.anc.1 = norm.freq.1/norm.anc.1)
+
+
+
+
+
 # y.string <-  'TASEP.bottle.neck.depth'
 # y.label <- 'Bottle neck depth (calculated by TASEP)'
 # x.string  <- 'TASEP.bottle.neck.position'
@@ -12,13 +44,14 @@ require(ggplot2)
 
 y.string <-  'log2(freq.norm.anc.1)'
 y.label <- 'Log 2 of frequency in sample over frequency in ancestor'
-x.string  <- 'log2(Trans)'
-x.label <- 'Log 2 Translation efficiency'
-col.string  <- 'TASEP.avgRiboNum'
-col.label <- 'Number of ribosomes\nper mRNA \n(calulated by TASEP)'
+x.string  <- 'log2(Prot)'
+x.label <- 'Log 2 Protein level'
+col.string  <- 'dG'
+# col.label <- 'Number of ribosomes\nper mRNA \n(calulated by TASEP)'
+col.label <- 'Delta G'
 
 
-result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\fitness_vs_x_and_color\\'
+result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\minerva\\prot_fitness_cor\\'
 new.dir <- clean.filename(paste(x.string,col.string,sep = '_'))
 result.dir <- paste0(result.dir,new.dir,'\\')
 dir.create(result.dir)
@@ -28,11 +61,6 @@ fitseq.xy <-  fitseq.data.tidy %>%
   mutate_(y = y.string,x = x.string)
 
 
-
-fitseq.xy <-  fitseq.xy %>% mutate_(col = col.string)
-fitseq.xy <-  fitseq.xy %>% 
-  ungroup() %>%
-  mutate(col.mid = median(col,na.rm = T))
 
 
 
@@ -74,6 +102,14 @@ text.loc.x <- x.limits[1] + ((x.limits[2]-x.limits[1])/100)
 fitseq.xy <-  fitseq.xy %>% 
   mutate(text.loc.x = text.loc.x,text.loc.y.all = text.loc.y.all,
          text.loc.y.rbs.promoter = text.loc.y.rbs.promoter )
+
+
+fitseq.xy <-  fitseq.xy %>% mutate_(col = col.string)
+fitseq.xy <-  fitseq.xy %>% 
+  ungroup() %>%
+  mutate(col.mid = median(col,na.rm = T))
+
+
 
 col.limits <-  fitseq.xy %>%
   ungroup() %>%
