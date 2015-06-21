@@ -1,0 +1,217 @@
+require(dplyr)
+require(tidyr)
+require(ggplot2)
+theme_aviv <-     theme_minimal() + 
+  theme( axis.line = element_line(colour = "black"),
+         axis.text=element_text(size=14), axis.title=element_text(size=16,face="bold"),
+         strip.text.x = element_text(size=16,face="bold"), strip.text.y = element_text(size=16,face="bold"), 
+         plot.title = element_text(size = 25,face = "bold"),
+         legend.text = element_text(size=14),legend.title = element_text(size=16,face="bold")	)
+
+
+fitseq.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\goodman_salis_tuller_fitseq_2_mismatch_with_0.csv'
+fitseq.data = read.csv(fitseq.data.location)
+fitseq.data = transform(fitseq.data, Prot = as.numeric(as.character(Prot))
+                        ,Bin.Pct.1 = as.numeric(as.character((Bin.Pct.1))),
+                        Count.RNA = as.numeric(as.character((Count.RNA))))
+fitseq.data.tidy <- fitseq.data %>% select(-Count.A.DNA,-Count.A.RNA,-Count.B.DNA,-Count.B.RNA,
+                                           -Bin.1,-Bin.2,-Bin.3,-Bin.4,-Bin.5,-Bin.6,-Bin.7,
+                                           -Bin.8,-Bin.9,-Bin.10,-Bin.11,-Bin.12,-RNA.A,-RNA.B,
+                                           -Bin.Pct.1,-Bin.Pct.2,-Bin.Pct.3,-Bin.Pct.4,-Bin.Pct.5,
+                                           -Bin.Pct.6,-Bin.Pct.7,-Bin.Pct.8,-Bin.Pct.9,-Bin.Pct.10,
+                                           -Bin.Pct.11,-Bin.Pct.12,-Insuff.Prot,-Insuff.DNA,
+                                           -Insuff.RNA,-Fltr.BelowRange,-Fltr.AboveRange ,
+                                           -Fltr.SetGood,-full.seq)
+fitseq.data.tidy  <- fitseq.data.tidy %>%   gather(sample, frequency, A_24:F_0)
+fitseq.data.tidy  <- fitseq.data.tidy %>% separate(sample, c("lineage", "day"), '_',convert = T)
+fitseq.data.tidy$RBS.Display <- factor(fitseq.data.tidy$RBS.Display,
+                                       levels = c("Strong", "Mid", "Weak", "WT"))
+
+
+
+
+fitseq.data.tidy <- fitseq.data.tidy %>% 
+  group_by(day,lineage) %>% 
+  mutate(sum.sample= sum(frequency),norm.freq = frequency/sum.sample,
+         sum.anc= sum(anc_1),norm.anc = anc_1/sum.anc,freq.norm.anc = norm.freq/norm.anc,
+         sum.sample.1= sum(frequency+1),norm.freq.1 = (frequency+1)/sum.sample.1,
+         sum.anc.1= sum(anc_1+1),norm.anc.1 = (anc_1+1)/sum.anc.1,freq.norm.anc.1 = norm.freq.1/norm.anc.1)
+
+fitseq.data.tidy <- fitseq.data.tidy %>% 
+  mutate(above.14 = log2(Prot)> 14)
+
+
+
+# y.string <-  'TASEP.bottle.neck.depth'
+# y.label <- 'Bottle neck depth (calculated by TASEP)'
+# x.string  <- 'TASEP.bottle.neck.position'
+# x.label <- 'Bottle neck position (calculated by TASEP)'
+# col.string  <- 'log2(freq.norm.anc.1)'
+# col.label <- 'Log 2 of frequency\nin sample over frequency \nin ancestor'
+
+
+y.string <-  'log2(freq.norm.anc.1)'
+y.label <- 'Log 2 of frequency in sample over frequency in ancestor'
+x.string  <- 'log2(Prot)'
+x.label <- 'Log 2 Protein level'
+col.string  <- 'above.14'
+# col.label <- 'Number of ribosomes\nper mRNA \n(calulated by TASEP)'
+col.label <- 'Protein level above 14'
+
+
+result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\minerva\\prot_fitness_cor\\'
+new.dir <- clean.filename(paste(x.string,col.string,sep = '_'))
+result.dir <- paste0(result.dir,new.dir,'\\')
+dir.create(result.dir)
+
+
+fitseq.xy <-  fitseq.data.tidy %>%
+  mutate_(y = y.string,x = x.string)
+
+
+
+
+
+
+fitseq.xy  <- fitseq.xy %>% 
+  ungroup() %>%
+  group_by(day,lineage) %>%
+  mutate(all.r = cor.test(x,y)$estimate,all.p = cor.test(x,y)$p.value, 
+         all.cor.text = paste0('r = ', round(all.r,2),'\np-value = ' ,formatC(all.p,format='e',digits = 2)))
+
+fitseq.xy <-  fitseq.xy %>% 
+  group_by(day,lineage,Promoter.Display,RBS.Display ) %>%
+  mutate(group.r = cor.test(x,y)$estimate,group.p = cor.test(x,y)$p.value,
+         group.cor.text = paste0('r = ', round(group.r,2),'\np-value = ' ,formatC(group.p,format='e',digits = 2)))
+
+
+# y.limits <-  fitseq.xy %>%
+#   ungroup() %>%
+#   summarise(min.y = min(y,na.rm = T),max.y = max(y,na.rm = T))
+# y.limits <- c(y.limits$min.y,y.limits$max.y)
+# y.limits.all <- y.limits
+# y.limits.rbs.promoter<- y.limits
+
+y.limits.all <- c(-5.5,4)
+y.limits.rbs.promoter <- c(-4.7,2)
+
+text.loc.y.all <- y.limits.all[2] - ((y.limits.all[2]-y.limits.all[1])/20)
+
+text.loc.y.rbs.promoter <- y.limits.rbs.promoter[2] - ((y.limits.rbs.promoter[2]-y.limits.rbs.promoter[1])/15)
+
+
+x.limits <-  fitseq.xy %>%
+  ungroup() %>%
+  summarise(min.x = min(x,na.rm = T),max.x = max(x,na.rm = T))
+x.limits <- c(x.limits$min.x,x.limits$max.x)
+
+text.loc.x <- x.limits[1] + ((x.limits[2]-x.limits[1])/100)
+
+fitseq.xy <-  fitseq.xy %>% 
+  mutate(text.loc.x = text.loc.x,text.loc.y.all = text.loc.y.all,
+         text.loc.y.rbs.promoter = text.loc.y.rbs.promoter )
+
+
+fitseq.xy <-  fitseq.xy %>% mutate_(col = col.string)
+# fitseq.xy[fitseq.xy$col > col.limits[2],'col'] <-  col.limits[2]
+
+
+# fitseq.xy <- 
+
+lineage.letter = 'C'
+day.number = 12
+
+for (lineage.letter in c('A','B','C','D','E','F')){
+  print(lineage.letter)
+#   for (day.number in seq(4,28,4)){
+#     print(day.number)
+
+col.plots.factor(fitseq.xy %>% filter(Promoter.Display == 'High',log2(Prot) < 17.5),day.number,lineage.letter)
+  }
+# }
+
+col.plots.factor <- function(fitseq.xy,day.number,lineage.letter){
+  
+  
+  fitseq.current.sample <-  fitseq.xy %>% filter(day == day.number, lineage == lineage.letter)
+  fitseq.current.sample.no.wt <-  fitseq.xy %>% filter(day == day.number, lineage == lineage.letter, RBS.Display != 'WT')
+  
+  
+  filename.all  <- paste('lineage', lineage.letter,'all','day', day.number,'x',x.string ,'vs',y.string, 'col', col.string,sep = '_')
+  filename.all  <-clean.filename(filename.all)
+  
+  png(paste0(result.dir,filename.all,'.png'),units="in",  width=15, height=12, res=70)
+  
+  title <- paste(x.label ,'vs\n',y.label,'\nfor day', day.number, 'lineage', lineage.letter)
+  
+  p <- ggplot(fitseq.current.sample,aes(x= x, y = y,color  = col)) +
+    geom_point(alpha = 0.3)   +
+    # ylim(y.limits) + xlim(x.limits) +
+    xlim(x.limits) +
+    coord_cartesian(ylim = y.limits.all) +
+    ylab(paste0(y.label,'\n')) + 
+    xlab(paste0('\n',x.label)) +
+    ggtitle(title) + 
+    geom_smooth(
+      aes_string(linetype = col.string),
+      color = 'red', size = 1.2, method = 'lm') +
+    # facet_grid(Promoter.Display ~ RBS.Display)  +
+#       scale_color_gradient2(
+#         low = 'blue', high = 'red',mid = 'yellow'
+#         #     low = '#3B4CC0', high = '#B4040D',name=col.label,mid = '#DDDDDD',
+#                                 ,midpoint = col.mid,limits =  col.limits
+#       ,name =col.label ) +
+#     geom_text(aes(x=text.loc.x, y=text.loc.y.all, face="bold", inherit.aes=FALSE,
+#                   parse=FALSE,hjust = 0,label=all.cor.text),colour="red") +
+    guides(colour = guide_legend(override.aes = list(alpha = 1),title = col.label) ,linetype = 'none') +
+  theme_aviv
+  print(p)
+  
+  dev.off()
+  
+  filename.promoter.rbs  <- paste('lineage', lineage.letter,'promoter_rbs','day', day.number,'x',x.string ,'vs',y.string, 'col', col.string,sep = '_')
+  
+  filename.promoter.rbs  <-clean.filename(filename.promoter.rbs)
+  
+  png(paste0(result.dir,filename.promoter.rbs,'.png'),units="in",  width=15, height=12, res=70)
+  p <- ggplot(fitseq.current.sample.no.wt,aes(x= x, y = y,color  = col)) +
+    geom_point(alpha = 0.3)   +
+    # ylim(y.limits) + xlim(x.limits) +
+    xlim(x.limits) +
+    coord_cartesian(ylim = y.limits.rbs.promoter) +
+    ylab(paste0(y.label,'\n')) + 
+    xlab(paste0('\n',x.label)) +
+    ggtitle(title) + 
+    geom_smooth(
+      aes_string(linetype = col.string),
+      color = 'red', size = 1.2, method = 'lm') +
+    facet_grid(Promoter.Display ~ RBS.Display)  +
+#     scale_color_gradient2(
+#       low = 'blue', high = 'red',mid = 'yellow'
+#       #     low = '#3B4CC0', high = '#B4040D',name=col.label,mid = '#DDDDDD',
+#       ,midpoint = col.mid,limits =  col.limits
+#       ,name =col.label ) +
+    geom_text(aes(x=text.loc.x, y=1.6, face="bold", inherit.aes=FALSE,
+                  parse=FALSE,hjust = 0,label=group.cor.text),colour="red") +
+    guides(colour = guide_legend(override.aes = list(alpha = 1),title = col.label) ,linetype = 'none') +
+    theme_aviv
+  
+  print(p)
+  dev.off()
+}
+
+
+clean.filename <- function(filename){
+  filename  <- gsub('\\(','_',filename)
+  filename  <- gsub('\\)','',filename)
+  filename  <- gsub('\\.','_',filename)
+  filename  <- gsub('\\+ 1','_plus_1',filename)
+  return(filename)
+  
+}
+
+
+
+
+
+
