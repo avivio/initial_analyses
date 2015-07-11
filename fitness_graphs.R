@@ -3,12 +3,13 @@ require(tidyr)
 require(ggplot2)
 
 
-result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\fitness_vs_x_lineages\\'
+result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\fitness_vs_x_lineages_pnas_correction\\'
 
-fitseq.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\goodman_salis_tuller_fitseq_2_mismatch_with_0.csv'
+fitseq.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\goodman_salis_tuller_fitseq_2_mismatch_with_0_pnas_correction.csv'
 fitseq.data = read.csv(fitseq.data.location)
-fitseq.data = transform(fitseq.data, Prot = as.numeric(Prot),Bin.Pct.1 = as.numeric(Bin.Pct.1),
-                        Count.RNA = as.numeric(Count.RNA))
+fitseq.data = transform(fitseq.data, Prot = as.numeric(as.character(Prot))
+                        ,Bin.Pct.1 = as.numeric(as.character((Bin.Pct.1))),
+                        Count.RNA = as.numeric(as.character((Count.RNA))))
 fitseq.data.tidy <- fitseq.data %>% select(-Count.A.DNA,-Count.A.RNA,-Count.B.DNA,-Count.B.RNA,
                                            -Bin.1,-Bin.2,-Bin.3,-Bin.4,-Bin.5,-Bin.6,-Bin.7,
                                            -Bin.8,-Bin.9,-Bin.10,-Bin.11,-Bin.12,-RNA.A,-RNA.B,
@@ -21,6 +22,18 @@ fitseq.data.tidy  <- fitseq.data.tidy %>%   gather(sample, frequency, A_24:F_0)
 fitseq.data.tidy  <- fitseq.data.tidy %>% separate(sample, c("lineage", "day"), '_',convert = T)
 fitseq.data.tidy$RBS.Display <- factor(fitseq.data.tidy$RBS.Display,
                                        levels = c("Strong", "Mid", "Weak", "WT"))
+
+
+
+
+fitseq.data.tidy <- fitseq.data.tidy %>% 
+  group_by(day,lineage) %>% 
+  mutate(sum.sample= sum(frequency),norm.freq = frequency/sum.sample,
+         sum.anc= sum(anc_1),norm.anc = anc_1/sum.anc,freq.norm.anc = norm.freq/norm.anc,
+         sum.sample.1= sum(frequency+1),norm.freq.1 = (frequency+1)/sum.sample.1,
+         sum.anc.1= sum(anc_1+1),norm.anc.1 = (anc_1+1)/sum.anc.1,freq.norm.anc.1 = norm.freq.1/norm.anc.1)
+
+
 
 #zero in anc 1 come back later
 View(fitseq.data.tidy %>% filter(anc_1 == 0 & day != 0 & frequency >0) %>% 
@@ -44,7 +57,7 @@ fitseq.data.tidy <- fitseq.data.tidy %>%
 
 
 x.strings <- 
-  c('Rel.Codon.Freq', 'log2(RNA)','Prot','log2(Trans)','CAI','tAI','CDS.GC','GC','dG','dG.noutr','dG.unif',
+  c('Rel.Codon.Freq', 'log2(RNA)','log2(Prot)','log2(Trans)','CAI','tAI','CDS.GC','GC','dG','dG.noutr','dG.unif',
     'RNA.FCC',	'Prot.FCC',	'Trans.FCC',	'tAI.DC',	'GC.DC',	'CDS.GC.DC'	,'CAI.DC',
     'RSCU.DC',	'dG.DC',	'dG.noutr.DC',	'dG.unif.DC',	'log2(salis.init)','salis.dG_total',
     'salis.dG_mRNA_rRNA',	'salis.dG_mRNA','TASEP.avgRate',	'TASEP.avgRiboNum',	'TASEP.density.avg',
@@ -69,8 +82,8 @@ y.label <- 'Log 2 of frequency in sample over frequency in ancestor'
 # y.string <-  'log2(RNA)'
 # y.label <- 'Log 2 of frequency '
 
-x.string  <- 'TASEP.avgRiboNum'
-x.label <- 'Ribosome number per mRNA (simulated by TASEP)'
+x.string  <- 'log2(Prot)'
+x.label <- 'Protein level'
 
 
 for (i in 1:length(x.labels)){
@@ -185,9 +198,8 @@ get.plots.for.day.lineage <- function(result.dir,fitseq.xy,day.number,lineage.le
 
 
 
-plot.scatter <-   function(fitseq.current.sample,day.number, lineage.letter,
-                           x.limits,y.limits,x.label,y.label) {
-  title <- paste(x.label ,'vs\n',y.label,'\nfor day', day.number, 'lineage', lineage.letter)
+plot.scatter <-   function(fitseq.current.sample,
+                           x.limits,y.limits,x.label,y.label,title) {
   
   p <- ggplot(fitseq.current.sample,aes(x= x, y = y)) +
     geom_point(alpha = 0.2)   +
@@ -212,7 +224,7 @@ plot.scatter <-   function(fitseq.current.sample,day.number, lineage.letter,
 plot.scatter.rbs.promoter <-   function(fitseq.current.sample,day.number, lineage.letter,x.limits,y.limits,
                                         x.label,y.label,text.loc.x,text.loc.y) {
   title <- paste(x.label ,'vs\n',y.label,'\nfor day', day.number, 'lineage', lineage.letter)
-  p <- plot.scatter(fitseq.current.sample,day.number, lineage.letter,x.limits,y.limits,x.label,y.label) +
+  p <- plot.scatter(fitseq.current.sample,x.limits,y.limits,x.label,y.label,title) +
     facet_grid(Promoter.Display ~ RBS.Display) +
     geom_text(aes(x=text.loc.x, y=text.loc.y.rbs.promoter, colour="red",face="bold", inherit.aes=FALSE, parse=FALSE,hjust = 0,label=group.cor.text), )
   
@@ -222,7 +234,7 @@ plot.scatter.rbs.promoter <-   function(fitseq.current.sample,day.number, lineag
 plot.scatter.all <-   function(fitseq.current.sample,day.number, lineage.letter,x.limits,y.limits,
                                x.label,y.label) {
   title <- paste(x.label ,'vs\n',y.label,'\nfor day', day.number, 'lineage', lineage.letter)
-  p <- plot.scatter(fitseq.current.sample,day.number, lineage.letter,x.limits,y.limits,x.label,y.label) +
+  p <- plot.scatter(fitseq.current.sample,x.limits,y.limits,x.label,y.label,title) +
     geom_text(aes(x=text.loc.x, y=text.loc.y.all, colour="red",face="bold", 
                   inherit.aes=FALSE, parse=FALSE,hjust = 0,label=all.cor.text), )
   

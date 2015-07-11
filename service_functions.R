@@ -44,7 +44,8 @@ load.fitseq.data <- function(location){
                                              -Bin.Pct.6,-Bin.Pct.7,-Bin.Pct.8,-Bin.Pct.9,-Bin.Pct.10,
                                              -Bin.Pct.11,-Bin.Pct.12,-Insuff.Prot,-Insuff.DNA,
                                              -Insuff.RNA,-Fltr.BelowRange,-Fltr.AboveRange ,
-                                             -Fltr.SetGood,-full.seq)
+                                             -Fltr.SetGood,-full.seq,-pep.sequence,-UTR,-CDS.seq,-Promoter.seq,-RBS.seq,-Promoter,
+                                             -variable.seq,-full.peptide,-preRBS,-salis.status)
   fitseq.data.tidy  <- fitseq.data.tidy %>%   gather(sample, frequency, A_24:F_0)
   fitseq.data.tidy  <- fitseq.data.tidy %>% separate(sample, c("lineage", "day"), '_',convert = T)
   fitseq.data.tidy$RBS.Display <- factor(fitseq.data.tidy$RBS.Display,
