@@ -51,17 +51,20 @@ for (i in 1:length(x.labels)){
   x.string <- names(x.labels)[i]
   x.label <- x.labels[i]
   print(x.string)
-  print.all.plots.for.x.and.y.goodman(fitseq.data,x.string,y.string,x.label,y.label)
+  filename <- paste('x',x.string ,'vs',y.string,sep = '_')
+  title <- paste(x.label ,'vs\n',y.label)
+  print.all.plots.for.x.and.y.goodman(fitseq.data,x.string,y.string,x.label,y.label,filename,title)
   
 }
 
 
 
 
-print.all.plots.for.x.and.y.goodman <- function(fitseq.data.tidy,x.string,y.string,x.label,y.label){
+print.all.plots.for.x.and.y.goodman <- function(result.dir,data,x.string,y.string,x.label,y.label,filename,title,
+                                                y.limits = NULL){
   dir.create(result.dir)
   
-  fitseq.xy <-  fitseq.data %>%
+  fitseq.xy <-  data %>%
     mutate_(y = y.string,x = x.string)
   
   fitseq.xy  <- fitseq.xy %>% 
@@ -77,69 +80,68 @@ print.all.plots.for.x.and.y.goodman <- function(fitseq.data.tidy,x.string,y.stri
   fitseq.xy <-  fitseq.xy %>% 
     select(x,y,all.cor.text,group.cor.text)
   
-  y.limits <-  fitseq.xy %>%
+  if (is.null(y.limits)){
+    
+    y.limits <-  fitseq.xy %>%
     ungroup() %>%
     summarise(min.y = min(y,na.rm = T),max.y = max(y,na.rm = T))
   y.limits <- c(y.limits$min.y,y.limits$max.y)
-#   y.limits.all <- c(-5.5,4)
-#   
-#   y.limits.rbs.promoter <- c(-4,2)
+  }
   y.limits.all <- y.limits
   y.limits.rbs.promoter <- y.limits
+  
   text.loc.y.all <- y.limits.all[2] - ((y.limits.all[2]-y.limits.all[1])/20)
   
   text.loc.y.rbs.promoter <- y.limits.rbs.promoter[2] - ((y.limits.rbs.promoter[2]-y.limits.rbs.promoter[1])/20)
   
-  
-  x.limits <-  fitseq.xy %>%
-    ungroup() %>%
-    summarise(min.x = min(x,na.rm = T),max.x = max(x,na.rm = T))
-  x.limits <- c(x.limits$min.x,x.limits$max.x)
+    x.limits <-  fitseq.xy %>%
+      ungroup() %>%
+      summarise(min.x = min(x,na.rm = T),max.x = max(x,na.rm = T))
+    x.limits <- c(x.limits$min.x,x.limits$max.x)
+
   
   text.loc.x <- x.limits[1] + ((x.limits[2]-x.limits[1])/100)
   
   fitseq.xy <-  fitseq.xy %>% 
     mutate(text.loc.x = text.loc.x,text.loc.y.all = text.loc.y.all,
            text.loc.y.rbs.promoter = text.loc.y.rbs.promoter )
-  
-  get.plots.goodman.data(result.dir,fitseq.xy,
+  get.plots.goodman.data(result.dir,fitseq.xy,filename,
                             x.limits,y.limits.all,y.limits.rbs.promoter,x.label,y.label,x.string,y.string,
-                            text.loc.x,text.loc.y.all,text.loc.y.rbs.promoter)
+                            text.loc.x,text.loc.y.all,text.loc.y.rbs.promoter,title)
   
 }
 
 
 
-get.plots.goodman.data <- function(result.dir,fitseq.xy,
+get.plots.goodman.data <- function(result.dir,fitseq.xy,file.name,
                                       x.limits,y.limits.all,y.limits.rbs.promoter,x.label,y.label,x.string,y.string,
-                                      text.loc.x,text.loc.y.all,text.loc.y.rbs.promoter){
+                                      text.loc.x,text.loc.y.all,text.loc.y.rbs.promoter,title){
   
   fitseq.current.sample <-  fitseq.xy %>% filter(RBS.Display != 'WT')
-  filename.all  <- filename.promoter.rbs  <- paste('x',x.string ,'vs',y.string,sep = '_')
+  filename.all  <-  paste('all',filename,sep = '_')
   filename.all  <-clean.filename(filename.all)
   
   png(paste0(result.dir,filename.all,'.png'),units="in",  width=15, height=12, res=70)
   
-  p.all <- plot.scatter.all.goodman(fitseq.current.sample,x.limits,y.limits.all,x.label,y.label)
+  p.all <- plot.scatter.all.goodman(fitseq.current.sample,x.limits,y.limits.all,x.label,y.label,title)
   print(p.all)
   dev.off()
   
-  filename.promoter.rbs  <- filename.promoter.rbs  <- paste('promoter_rbs','x',x.string ,'vs',y.string, sep = '_')
+  filename.promoter.rbs  <- filename.promoter.rbs  <- paste('promoter_rbs',filename,sep = '_')
   
   filename.promoter.rbs  <-clean.filename(filename.promoter.rbs)
   
   png(paste0(result.dir,filename.promoter.rbs,'.png'),units="in",  width=15, height=12, res=70)
   
   p.promoter.rbs <- plot.scatter.rbs.promoter.goodman(fitseq.current.sample,x.limits,y.limits.rbs.promoter,x.label,y.label,
-                                              text.loc.x,text.loc.y.rbs.promoter)
+                                              text.loc.x,text.loc.y.rbs.promoter,title)
   print(p.promoter.rbs)
   dev.off()
   
 }
 
 plot.scatter.rbs.promoter.goodman <-   function(fitseq.current.sample,x.limits,y.limits,
-                                        x.label,y.label,text.loc.x,text.loc.y) {
-  title <- paste(x.label ,'vs\n',y.label)
+                                        x.label,y.label,text.loc.x,text.loc.y,title) {
   p <- plot.scatter(fitseq.current.sample,x.limits,y.limits,x.label,y.label,title) +
     facet_grid(Promoter.Display ~ RBS.Display) +
     geom_text(aes(x=text.loc.x, y=text.loc.y.rbs.promoter, colour="red",face="bold", inherit.aes=FALSE, parse=FALSE,hjust = 0,label=group.cor.text), )
@@ -148,8 +150,8 @@ plot.scatter.rbs.promoter.goodman <-   function(fitseq.current.sample,x.limits,y
   
 }
 plot.scatter.all.goodman <-   function(fitseq.current.sample,x.limits,y.limits,
-                               x.label,y.label) {
-  title <- paste(x.label ,'vs\n',y.label)
+                               x.label,y.label,title) {
+
   p <- plot.scatter(fitseq.current.sample,x.limits,y.limits,x.label,y.label,title) +
     geom_text(aes(x=text.loc.x, y=text.loc.y.all, colour="red",face="bold", 
                   inherit.aes=FALSE, parse=FALSE,hjust = 0,label=all.cor.text), )

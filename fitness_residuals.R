@@ -47,15 +47,17 @@ x.labels <-
 names(x.labels) <- x.strings
 
 
-protein.fitness.lm <-  lm(freq.norm.anc.1 ~ Prot, data=fitseq.data.tidy)
-protein.fitness.coeffs <- coefficients(protein.fitness.lm)
+# protein.fitness.lm <-  lm(freq.norm.anc.1 ~ Prot, data=fitseq.data.tidy)
+# protein.fitness.coeffs <- coefficients(protein.fitness.lm)
+# 
+# fitseq.data.prediction <- fitseq.data.tidy  %>% 
+#   mutate(prediction =protein.fitness.coeffs[1] + protein.fitness.coeffs[2]*Prot,
+#          fit.resid = freq.norm.anc.1 -  prediction)
 
-fitseq.data.prediction <- fitseq.data.tidy  %>% 
-  mutate(prediction =protein.fitness.coeffs[1] + protein.fitness.coeffs[2]*Prot,
-         fit.resid = freq.norm.anc.1 -  prediction)
+day.number = 12
+fitseq.data.tidy.day <- fitseq.data.tidy %>% filter(day == day.number)
 
-
-fitseq.data.models <- fitseq.data.tidy %>% 
+fitseq.data.models <- fitseq.data.tidy.day %>% 
   group_by(lineage) %>% 
   do(lin =  lm(freq.norm.anc.1 ~ Prot, data=.)) %>%
   mutate(intercept = coefficients(lin)[1],slope = coefficients(lin)[2] ) %>%
@@ -77,7 +79,7 @@ y.limits <- c(y.limits$min.y,y.limits$max.y)
 result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\fitness_residuals\\'
 dir.create(result.dir)
 
-day.number = 12
+
 for (lineage.letter in c('A','B','C','D','E','F')){
   print(lineage.letter)
 

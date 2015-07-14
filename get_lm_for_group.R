@@ -6,9 +6,9 @@ for (lineage.letter in c('A','B','C','D','E','F')){
   print('above 14')
   data.lm.h = lm(log2(freq.norm.anc.1)~log2(Prot), data =filter(fitseq.current.sample, above.14 == TRUE) )
   
-  slope.h <- signif(data.lm.h$coef[[2]], 5)
-  p.value.h <- summary(data.lm.h)$coef[2,4]
-  rmsd.h = signif(sqrt(mean(data.lm.h$residuals^2)))
+  slope.h <- signif(data.lm.h$coef[[2]], 2)
+  p.value.h <- formatC(summary(data.lm.h)$coef[2,4],format='e',digits = 2)
+  rmsd.h = signif(sqrt(mean(data.lm.h$residuals^2)),2)
   
   lm.text.h <- paste('Slope:',slope.h,'p value:',p.value.h,'RMSD:',rmsd.h )
   print(lm.text.h)

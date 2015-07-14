@@ -109,7 +109,7 @@ print('binding fitseq and sd data')
 fitseq.data <- cbind(fitseq.data,sd.properties)
 
 print('output data to file')
-write.csv(fitseq.data,, row.names=FALSE,
+write.csv(fitseq.data, row.names=FALSE,
           file = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\sd_pep_goodman_salis_tuller_fitseq_2_mismatch_with_0.csv')
 print('Done')
 

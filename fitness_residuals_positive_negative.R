@@ -220,10 +220,8 @@ col.plots.factor <- function(fitseq.xy,day.number,lineage.letter,data.set.name,r
   dev.off()
 }
 
-fitseq.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\goodman_salis_tuller_fitseq_2_mismatch_with_0.csv'
+fitseq.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\pep_data_goodman_salis_tuller_fitseq_2_mismatch_with_0.csv'
 fitseq.data.tidy  <- load.fitseq.data(fitseq.data.location)
-fitseq.data.tidy <- fitseq.data.tidy %>% select(-CDS.seq,-Promoter.seq,-RBS.seq,-Promoter,
-                                                -variable.seq,-full.peptide,salis.status)
 
 fitseq.data.tidy <- fitseq.data.tidy %>% 
   mutate(above.14 = log2(Prot)> 14)
@@ -276,6 +274,7 @@ fitseq.data.residuals <- fitseq.data.residuals %>%
 
 fitseq.data.residuals <- fitseq.data.residuals %>% 
   filter( 
+    log2(Prot) < 17.5,
     abs(fit.resid) >  percentile
   )
 
@@ -287,7 +286,7 @@ fitseq.data.residuals.above.14 <- fitseq.data.residuals %>% filter(above.14 == T
 
 
 
-data.set.name <- 'high_promoter_with_wall_80_percentile'
+data.set.name <- 'high_promoter_no_wall_80_percentile_peptide_properties'
 
 
 
@@ -309,17 +308,32 @@ for (lineage.letter in c('A','B','C','D','E','F')){
   result.dir <- paste0(base.result.dir,'pos_neg_histograms\\')
   dir.create(result.dir)
   
-
+    variables <- 
+      c('pep.pi','pep.cost','pep.mw','pep.aindex','pep.boman','pep.charge','pep.hmoment','pep.hydro','pep.instability','pep.Ala','pep.Cys','pep.Asp','pep.Glu',
+        'pep.Phe','pep.Gly','pep.His','pep.Ile','pep.Lys','pep.Leu','pep.Met','pep.Asn','pep.Pro','pep.Gln','pep.Arg','pep.Ser','pep.Thr','pep.Val','pep.Trp','pep.Tyr',
+        'pep.tiny','pep.small','pep.aliphatic','pep.aromatic','pep.non.polar','pep.polar','pep.charged','pep.basic','pep.acidic')
+    labels <- 
+      c('Peptide pI','Peptide cost','Peptide molecular weight','Peptide aliphatic index','Peptide Boman index','Peptide charge','Peptide hydrophyicl moment',
+        'Peptide hydrophobicity','Peptide instability index','Peptide Alanine content','Peptide Cystine content','Peptide Aspartate content',
+        'Peptide glutamine content','Peptide Phenylalanine content','Peptide Glycine content','Peptide histidine content','Peptide Isoleucine content',
+        'Peptide Lysine content','Peptide Leucine content','Peptide Methionine content','Peptide Asparginine content','Peptide Proline content',
+        'Peptide Glutamine content','Peptide Arginine content','Peptide Serine content','Peptide Threonine content','Peptide Valine content',
+        'Peptide Tryptophan content','Peptide Tyrosine content','Peptide tiny amino acid content','Peptide small amino acid content',
+        'Peptide aliphatic amino acid content','Peptide aromitc amino acid content','Peptide non polar amino acid content','Peptide polar amino acid content',
+        'Peptide charged amino acid content','Peptide basic amino acid content','Peptide acidic amino acid content')
+    
+    names(labels) <- variables
   
-  variables <- 
-    c('Rel.Codon.Freq','CAI','tAI','CDS.GC','GC','dG','dG.noutr','dG.unif','log2(salis.init)',
-      'TASEP.avgRiboNum',	'TASEP.density.0',	'TASEP.bottle.neck.position',	'TASEP.bottle.neck.depth')
-  labels <- 
-    c('Relative codon frequency','CAI','tAI','Coding sequence GC %',' GC %','Delta G','Delta G no UTR',
-      'Delta G cut at -5','Log 2 RBS calculator initition rate',
-      'Average ribosome number (calculated using TASEP)','Density at start codon (calculated using TASEP)',
-      'Bottle neck position (calculated using TASEP)','Bottle neck depth (calculated using TASEP)')
-  names(labels) <- variables
+  
+#   variables <- 
+#     c('Rel.Codon.Freq','CAI','tAI','CDS.GC','GC','dG','dG.noutr','dG.unif','log2(salis.init)',
+#       'TASEP.avgRiboNum',	'TASEP.density.0',	'TASEP.bottle.neck.position',	'TASEP.bottle.neck.depth')
+#   labels <- 
+#     c('Relative codon frequency','CAI','tAI','Coding sequence GC %',' GC %','Delta G','Delta G no UTR',
+#       'Delta G cut at -5','Log 2 RBS calculator initition rate',
+#       'Average ribosome number (calculated using TASEP)','Density at start codon (calculated using TASEP)',
+#       'Bottle neck position (calculated using TASEP)','Bottle neck depth (calculated using TASEP)')
+#   names(labels) <- variables
   for (i in 1:length(labels)){
     variable  <- names(labels)[i]
     label <- labels[i]

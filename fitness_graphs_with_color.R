@@ -1,6 +1,7 @@
 require(dplyr)
 require(tidyr)
 require(ggplot2)
+require(colorspace)
 
 fitseq.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\goodman_salis_tuller_fitseq_2_mismatch_with_0.csv'
 fitseq.data = read.csv(fitseq.data.location)
@@ -32,7 +33,8 @@ fitseq.data.tidy <- fitseq.data.tidy %>%
 
 
 
-
+fitseq.data.tidy <- fitseq.data.tidy %>% 
+  mutate(above.14 = log2(Prot)> 14)
 
 # y.string <-  'TASEP.bottle.neck.depth'
 # y.label <- 'Bottle neck depth (calculated by TASEP)'
@@ -46,15 +48,8 @@ y.string <-  'log2(freq.norm.anc.1)'
 y.label <- 'Log 2 of frequency in sample over frequency in ancestor'
 x.string  <- 'log2(Prot)'
 x.label <- 'Log 2 Protein level'
-col.string  <- 'dG'
-# col.label <- 'Number of ribosomes\nper mRNA \n(calulated by TASEP)'
-col.label <- 'Delta G'
 
 
-result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\minerva\\prot_fitness_cor\\'
-new.dir <- clean.filename(paste(x.string,col.string,sep = '_'))
-result.dir <- paste0(result.dir,new.dir,'\\')
-dir.create(result.dir)
 
 
 fitseq.xy <-  fitseq.data.tidy %>%
@@ -103,6 +98,21 @@ fitseq.xy <-  fitseq.xy %>%
   mutate(text.loc.x = text.loc.x,text.loc.y.all = text.loc.y.all,
          text.loc.y.rbs.promoter = text.loc.y.rbs.promoter )
 
+col.string  <- 'dG'
+# col.label <- 'Number of ribosomes\nper mRNA \n(calulated by TASEP)'
+col.label <- 'Delta G'
+
+col.strings <- 
+  c('CDS.GC','GC','dG','dG.noutr','dG.unif')
+col.labels <- 
+  c('Coding sequence\nGC content','GC content','Delta G','Delta G\nno UTR','Delta G\nsequence cut at -5')
+names(col.labels) <- col.strings
+
+for (i in 1:length(col.labels)){
+  col.string <- names(col.labels)[i]
+  col.label <- col.labels[i]
+  print(col.string)
+  
 
 fitseq.xy <-  fitseq.xy %>% mutate_(col = col.string)
 fitseq.xy <-  fitseq.xy %>% 
@@ -115,7 +125,7 @@ col.limits <-  fitseq.xy %>%
   ungroup() %>%
   summarise(min.col = min(col,na.rm = T),max.col = max(col,na.rm = T),
             min.quant = quantile(col,probs=.1,na.rm = T),max.quant = quantile(col,probs=.8,na.rm = T))
-col.limits <- c(col.limits$min.col,col.limits$max.quant)
+col.limits <- c(col.limits$min.col,col.limits$max.col)
 
 col.mid <- mean(col.limits)
 
@@ -123,23 +133,29 @@ col.mid <- mean(col.limits)
 
 
 
+result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\minerva\\test\\'
+new.dir <- clean.filename(paste(x.string,col.string,sep = '_'))
+result.dir <- paste0(result.dir,new.dir,'\\')
+dir.create(result.dir)
 
 lineage.letter = 'C'
 day.number = 12
 
 for (lineage.letter in c('A','B','C','D','E','F')){
   print(lineage.letter)
-  for (day.number in seq(4,28,4)){
+  # for (day.number in seq(4,28,4)){
   print(day.number)
-    col.plots(day.number,lineage.letter)
-  }
+    col.plots(fitseq.xy %>% filter(above.14 == T,Promoter.Display == 'High'),day.number,lineage.letter)
+  # }
+}
 }
 
-col.plots <- function(day.number,lineage.letter){
+col.plots <- function(fitseq.xy,day.number,lineage.letter){
   
-
-fitseq.current.sample <-  fitseq.xy %>% filter(day == day.number, lineage == lineage.letter, RBS.Display != 'WT')
-
+  
+  fitseq.current.sample <-  fitseq.xy %>% filter(day == day.number, lineage == lineage.letter)
+  fitseq.current.sample.no.wt <-  fitseq.xy %>% filter(day == day.number, lineage == lineage.letter, RBS.Display != 'WT')
+  
 
 filename.all  <- paste('lineage', lineage.letter,'all','day', day.number,'x',x.string ,'vs',y.string, 'col', col.string,sep = '_')
 filename.all  <-clean.filename(filename.all)
@@ -148,28 +164,27 @@ png(paste0(result.dir,filename.all,'.png'),units="in",  width=15, height=12, res
 
 title <- paste(x.label ,'vs\n',y.label,'\nfor day', day.number, 'lineage', lineage.letter)
 
-p <- ggplot(fitseq.current.sample,aes(x= x, y = y,color  = col,)) +
-  geom_point(alpha = 0.3)   +
+p <- ggplot(fitseq.current.sample,aes(x= x, y = y,color  = col)) +
+  geom_point(alpha = 0.5)   +
   theme_minimal() + 
-  theme( axis.line = element_line(colour = "black"),
-         axis.text=element_text(size=14), axis.title=element_text(size=16,face="bold"),
-         strip.text.x = element_text(size=16,face="bold"), strip.text.y = element_text(size=16,face="bold"), 
-         plot.title = element_text(size = 25,face = "bold")) +
   # ylim(y.limits) + xlim(x.limits) +
-  xlim(x.limits) +
+  # xlim(x.limits) +
   coord_cartesian(ylim = y.limits.all) +
   ylab(paste0(y.label,'\n')) + 
   xlab(paste0('\n',x.label)) +
   ggtitle(title) + 
   geom_smooth(color = 'red', size = 1.2, method = 'lm') +
    # facet_grid(Promoter.Display ~ RBS.Display)  +
-  scale_color_gradient(
-    low = 'blue', high = 'red'
-    #     low = '#3B4CC0', high = '#B4040D',name=col.label,mid = '#DDDDDD',
-    #                         midpoint = col.mid,limits =  col.limits
-  ,name =col.label ) +
+  scale_color_gradientn(colours = rainbow_hcl(4)
+#     low = 'blue', high = 'red'
+#     #     low = '#3B4CC0', high = '#B4040D',name=col.label,mid = '#DDDDDD',
+#     #                         midpoint = col.mid,limits =  col.limits
+  ,name =col.label 
+  ) +
   geom_text(aes(x=text.loc.x, y=text.loc.y.all, face="bold", inherit.aes=FALSE,
-                 parse=FALSE,hjust = 0,label=all.cor.text),colour="red")
+                 parse=FALSE,hjust = 0,label=all.cor.text),colour="red")+
+  theme_aviv
+
 print(p)
 
 dev.off()
@@ -179,29 +194,48 @@ filename.promoter.rbs  <- paste('lineage', lineage.letter,'promoter_rbs','day', 
 filename.promoter.rbs  <-clean.filename(filename.promoter.rbs)
 
 png(paste0(result.dir,filename.promoter.rbs,'.png'),units="in",  width=15, height=12, res=70)
-p <- ggplot(fitseq.current.sample,aes(x= x, y = y,color  = col,)) +
-  geom_point(alpha = 0.3)   +
-  theme_minimal() + 
-  theme( axis.line = element_line(colour = "black"),
-         axis.text=element_text(size=14), axis.title=element_text(size=16,face="bold"),
-         strip.text.x = element_text(size=16,face="bold"), strip.text.y = element_text(size=16,face="bold"), 
-         plot.title = element_text(size = 25,face = "bold")) +
+p <- ggplot(fitseq.current.sample.no.wt,aes(x= x, y = y,color  = col,)) +
+  geom_point(alpha = 0.5)   +
   # ylim(y.limits) + xlim(x.limits) +
-  xlim(x.limits) +
+   # xlim(x.limits) +
   coord_cartesian(ylim = y.limits.rbs.promoter) +
   ylab(paste0(y.label,'\n')) + 
   xlab(paste0('\n',x.label)) +
   ggtitle(title) + 
   geom_smooth(color = 'red', size = 1.2, method = 'lm') +
   facet_grid(Promoter.Display ~ RBS.Display)  +
-  scale_color_gradient(
-    low = 'blue', high = 'red'
-#     low = '#3B4CC0', high = '#B4040D',name=col.label,mid = '#DDDDDD',
-#                         midpoint = col.mid,limits =  col.limits
-,name =col.label ) +
+  scale_color_gradientn(colours = rainbow_hcl(4)
+#     low = 'blue', high = 'red'
+# #     low = '#3B4CC0', high = '#B4040D',name=col.label,mid = '#DDDDDD',
+# #                         midpoint = col.mid,limits =  col.limits
+,name =col.label 
+) +
   geom_text(aes(x=text.loc.x, y=1.6, face="bold", inherit.aes=FALSE,
-                parse=FALSE,hjust = 0,label=group.cor.text),colour="red")
+                parse=FALSE,hjust = 0,label=group.cor.text),colour="red") +
+  theme_aviv
 
 print(p)
 dev.off()
 }
+
+theme_aviv <-     theme_minimal() + 
+  theme( axis.line = element_line(colour = "black"),
+         axis.text=element_text(size=14), axis.title=element_text(size=16,face="bold"),
+         strip.text.x = element_text(size=16,face="bold"), strip.text.y = element_text(size=16,face="bold"), 
+         plot.title = element_text(size = 25,face = "bold"),
+         legend.text = element_text(size=14),legend.title = element_text(size=16,face="bold")	)
+
+clean.filename <- function(filename){
+  filename  <- gsub('\\(','_',filename)
+  filename  <- gsub('\\)','',filename)
+  filename  <- gsub('\\.','_',filename)
+  filename  <- gsub('\\+ 1','_plus_1',filename)
+  return(filename)
+  
+}
+
+
+
+
+
+
