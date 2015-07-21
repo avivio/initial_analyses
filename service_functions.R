@@ -1,6 +1,7 @@
 
 
 load.packages <- function(){
+  require(RMySQL)
   require(dplyr)
   require(tidyr)
   require(ggplot2)
