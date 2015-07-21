@@ -226,7 +226,7 @@ fitseq.data.tidy  <- load.fitseq.data(fitseq.data.location)
 fitseq.data.tidy <- fitseq.data.tidy %>% 
   mutate(above.14 = log2(Prot)> 14)
 
-
+#adding something tiny for commit
 #define parameters for correlation 
 
 y.string <-  'log2(freq.norm.anc.1)'
