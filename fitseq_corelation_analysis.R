@@ -6,6 +6,7 @@ results.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\'
 raw_data_location_2_mismatches = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\final_result_14-05-15-1551_2_mismatches.csv'
 fitseq_raw_data_2_mismatches = read.csv(raw_data_location_2_mismatches,check.names=FALSE)
 colnames(fitseq_raw_data_2_mismatches)[1] = 'design'
+fitseq_raw_data_2_mismatches  <- fitseq_raw_data_2_mismatches  %>% select(-anc_2)
 fitseq_raw_data_mat_2_mismatches  <- data.matrix(fitseq_raw_data_2_mismatches %>% select(-design))
 fitseq_raw_data_norm_2_mismatches  <- data.frame(sweep(fitseq_raw_data_mat_2_mismatches,2,colSums(fitseq_raw_data_mat_2_mismatches),`/`))
 fitseq_raw_data_norm_log1p_2_mismatches  <- data.frame(log10(sweep(fitseq_raw_data_mat_2_mismatches+1,2,colSums(fitseq_raw_data_mat_2_mismatches+1),`/`)))
@@ -15,6 +16,7 @@ fitseq_raw_data_norm_log1p_2_mismatches  <- data.frame(log10(sweep(fitseq_raw_da
 raw_data_location_0_mismatches = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\final_result_14-05-15-1551_0_mismatches.csv'
 fitseq_raw_data_0_mismatches = read.csv(raw_data_location_0_mismatches,check.names=FALSE)
 colnames(fitseq_raw_data_0_mismatches)[1] = 'design'
+fitseq_raw_data_0_mismatches  <- fitseq_raw_data_0_mismatches  %>% select(-anc_2)
 fitseq_raw_data_mat_0_mismatches  <- data.matrix(fitseq_raw_data_0_mismatches %>% select(-design))
 fitseq_raw_data_norm_0_mismatches  <- data.frame(sweep(fitseq_raw_data_mat_0_mismatches,2,colSums(fitseq_raw_data_mat_0_mismatches),`/`))
 fitseq_raw_data_norm_log1p_0_mismatches  <- data.frame(log10(sweep(fitseq_raw_data_mat_0_mismatches+1,2,colSums(fitseq_raw_data_mat_0_mismatches+1),`/`)))
