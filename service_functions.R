@@ -1,4 +1,10 @@
-
+#change for commit
+load.db <- function(){
+  fitseq.db <- src_mysql('fitseq_db', host = 'localhost', port = 3306L, user = "root", password = "a123456789")
+  fitseq.data <- tbl(fitseq.db, "fitseq_long")
+  return(fitseq.data)
+}
+  
 
 load.packages <- function(){
   require(RMySQL)
