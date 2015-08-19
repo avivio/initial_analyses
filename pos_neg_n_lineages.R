@@ -26,12 +26,13 @@ compare.pos.neg.all.lineages  <- function(fitseq.data.prediction,variable,label,
   
   legend.string.negative  <- fitseq.current.sample %>%
     ungroup %>% 
-    filter(legend.string== 'Negative') %>%select_(variable) 
+    filter(legend.string== 'Negative') %>%
+    mutate_(new_variable = variable)  %>% select(new_variable) 
   legend.string.negative <- as.numeric( unlist(legend.string.negative))  
   legend.string.positive  <- fitseq.current.sample %>%
     ungroup %>% 
     filter(legend.string== 'Positive') %>%
-    select_(variable) 
+    mutate_(new_variable = variable)  %>% select(new_variable) 
   legend.string.positive <- as.numeric( unlist(legend.string.positive)) 
   
   wilcox.string.all <- get.wilcox.string(legend.string.positive,legend.string.negative)
@@ -48,12 +49,12 @@ compare.pos.neg.all.lineages  <- function(fitseq.data.prediction,variable,label,
     legend.string.negative.rbs  <- fitseq.current.sample.no.wt %>%
       ungroup %>% 
       filter(legend.string== 'Negative',RBS.Display == rbs) %>%
-      select_(variable) 
+      mutate_(new_variable = variable)  %>% select(new_variable)  
     legend.string.negative.rbs <- as.numeric( unlist(legend.string.negative.rbs))  
     legend.string.positive.rbs  <- fitseq.current.sample.no.wt %>%
       ungroup %>% 
       filter(legend.string== 'Positive',RBS.Display == rbs) %>%
-      select_(variable) 
+      mutate_(new_variable = variable)  %>% select(new_variable) 
     legend.string.positive.rbs <- as.numeric( unlist(legend.string.positive.rbs)) 
     
     wilcox.string.rbs[rbs] <- get.wilcox.string(legend.string.positive.rbs,legend.string.negative.rbs)
@@ -195,15 +196,13 @@ filter.n.fitness.residuals <- function(n,fitseq.data.residuals){
 }
 
 
-fitseq.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\goodman_salis_tuller_fitseq_2_mismatch_with_0.csv'
-fitseq.data.tidy  <- load.fitseq.data(fitseq.data.location)
-fitseq.data.tidy <- fitseq.data.tidy %>% select(-CDS.seq,-Promoter.seq,-RBS.seq,-Promoter,
-                                                -variable.seq,-full.peptide,salis.status)
+fitseq.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\fitseq_data_with_meta_day_12_no_umi_05_08.csv'
+fitseq.data.residuals  <- load.fitseq.data(fitseq.data.location)
 
-fitseq.data.tidy <- fitseq.data.tidy %>% 
+fitseq.data.residuals <- fitseq.data.residuals %>% 
   mutate(above.14 = log2(Prot)> 14)
 
-
+#adding something tiny for commit
 #define parameters for correlation 
 
 y.string <-  'log2(freq.norm.anc.1)'
@@ -214,17 +213,16 @@ col.string  <- 'above.14'
 # col.label <- 'Number of ribosomes\nper mRNA \n(calulated by TASEP)'
 col.label <- 'Protein level\nabove 14'
 
-# get correlation data into data set
-fitseq.data.residuals <- get.data.for.correlation.category(fitseq.data.tidy,y.string,y.label,x.string,x.label,col.string,col.label)
 
 
 
 fitseq.data.residuals <- fitseq.data.residuals %>% 
-  filter( 
-    Promoter.Display=='High'
-    ,log2(Prot) < 17.5
-    # ,abs(fit.resid) >  percentile
-  )
+  filter(     log2(Prot) < 17.5,
+              
+              Promoter.Display=='High')
+
+fitseq.data.residuals <- get.data.for.correlation.category(fitseq.data.residuals,y.string,y.label,x.string,x.label,col.string,col.label)
+
 
 fitseq.data.residuals <- filter.n.fitness.residuals(5,fitseq.data.residuals)
 
@@ -236,7 +234,7 @@ fitseq.data.residuals.above.14 <- fitseq.data.residuals %>% filter(above.14 == T
 
 
 
-data.set.name <- 'high_promoter_with_wall_5_positive'
+data.set.name <- 'high_promoter_no_wall_5_lineages_identical_sign'
 legend.string <- 'n.pos.neg'
 legend.label <- '5 lineages positive'
 
@@ -261,9 +259,11 @@ fitseq.data.residuals.above.14  %>%
 
 
 
-base.result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\fitness_residuals\\'
+base.result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\no_umi_rerun\\fitness_residuals\\'
 base.result.dir= paste0(base.result.dir,data.set.name,'\\')
 dir.create(base.result.dir)
+names(labels) <- variables
+
 for (lineage.letter in c('A','B','C','D','E','F')){
   print(lineage.letter)
   
@@ -280,15 +280,6 @@ new.dir <- clean.filename(paste(x.string,col.string,sep = '_'))
   dir.create(result.dir)
   
   
-  variables <- 
-    c('Rel.Codon.Freq','CAI','tAI','CDS.GC','GC','dG','dG.noutr','dG.unif','log2(salis.init)',
-      'TASEP.avgRiboNum',	'TASEP.density.0',	'TASEP.bottle.neck.position',	'TASEP.bottle.neck.depth')
-  labels <- 
-    c('Relative codon frequency','CAI','tAI','Coding sequence GC %',' GC %','Delta G','Delta G no UTR',
-      'Delta G cut at -5','Log 2 RBS calculator initition rate',
-      'Average ribosome number (calculated using TASEP)','Density at start codon (calculated using TASEP)',
-      'Bottle neck position (calculated using TASEP)','Bottle neck depth (calculated using TASEP)')
-  names(labels) <- variables
   for (i in 1:length(labels)){
     variable  <- names(labels)[i]
     label <- labels[i]

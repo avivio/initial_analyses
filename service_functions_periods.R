@@ -1,12 +1,12 @@
 #change for commit
-load_db <- function(){
-  fitseq_db <- src_mysql('fitseq_db', host = 'localhost', port = 3306L, user = "root", password = "a123456789")
-  fitseq_data <- tbl(fitseq_db, "fitseq_long")
-  return(fitseq_data)
+load.db <- function(){
+  fitseq.db <- src.mysql('fitseq.db', host = 'localhost', port = 3306L, user = "root", password = "a123456789")
+  fitseq.data <- tbl(fitseq.db, "fitseq.long")
+  return(fitseq.data)
 }
-  
 
-load_packages <- function(){
+
+load.packages <- function(){
   require(RMySQL)
   require(dplyr)
   require(tidyr)
@@ -14,7 +14,7 @@ load_packages <- function(){
   require(colorspace)
   require(scales)
 }
-get_wilcox_string <-  function(pos,neg){
+get.wilcox.string <-  function(pos,neg){
   
   greater <- wilcox.test(pos,neg,alternative = 'greater')$p.value
   less <- wilcox.test(pos,neg,alternative = 'less')$p.value
@@ -27,18 +27,18 @@ get_wilcox_string <-  function(pos,neg){
   
 }
 
-load_packages()
+load.packages()
 
-theme_aviv <-     theme_minimal() + 
+theme_aviv <-       theme_minimal() + 
   theme( axis.line = element_line(colour = "black"),
-         axis.text=element_text(size=14), axis.title=element_text(size=16,face="bold"),
-         strip.text.x = element_text(size=16,face="bold"), strip.text.y = element_text(size=16,face="bold"), 
+         axis.text=element_text(size=14), axis.title=element_text(size=16,face="bold" ),axis.title.x = element_text(vjust=-0.5),
+         axis.title.y = element_text(vjust=1.5),strip.text.x = element_text(size=16,face="bold"), strip.text.y = element_text(size=16,face="bold"), 
          plot.title = element_text(size = 25,face = "bold"),
          legend.text = element_text(size=16),legend.title = element_text(size=18,face="bold")	)
 
 
 
-load.fitseq.data <- function(location){
+load.fitseq.data <- function(fitseq.data.location){
   
   fitseq.data = read.csv(fitseq.data.location)
   fitseq.data = transform(fitseq.data, Prot = as.numeric(as.character(Prot))
@@ -53,7 +53,7 @@ load.fitseq.data <- function(location){
                                              -Insuff.RNA,-Fltr.BelowRange,-Fltr.AboveRange ,
                                              -Fltr.SetGood,-full.seq,-pep.sequence,-UTR,-CDS.seq,-Promoter.seq,-RBS.seq,-Promoter,
                                              -variable.seq,-full.peptide,-preRBS,-salis.status)
-  fitseq.data.tidy  <- fitseq.data.tidy %>%   gather(sample, frequency, A_24:F_0)
+  fitseq.data.tidy  <- fitseq.data.tidy %>%   gather(sample, frequency, D_12:F_12)
   fitseq.data.tidy  <- fitseq.data.tidy %>% separate(sample, c("lineage", "day"), '_',convert = T)
   fitseq.data.tidy$RBS.Display <- factor(fitseq.data.tidy$RBS.Display,
                                          levels = c("Strong", "Mid", "Weak", "WT"))
@@ -72,11 +72,11 @@ load.fitseq.data <- function(location){
   return(fitseq.data.tidy)
 }
 
-clean_filename <- function(filename){
+clean.filename <- function(filename){
   filename  <- gsub('\\(','_',filename)
   filename  <- gsub('\\)','',filename)
   filename  <- gsub('\\.','_',filename)
-  filename  <- gsub('\\+ 1','_plus_1',filename)
+  filename  <- gsub('\\+ 1','.plus.1',filename)
   return(filename)
   
 }

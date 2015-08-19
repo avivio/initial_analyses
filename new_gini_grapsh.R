@@ -1,8 +1,10 @@
+
 require(dplyr)
 require(tidyr)
 require(ggplot2)
 require(ineq)
 require(scales)
+
 
 theme_aviv <-     theme_minimal() + 
   theme( axis.line = element_line(colour = "black"),
@@ -48,14 +50,17 @@ gini <-  gini %>%
 #     group_by(day,lineage) %>%
 #     summarise(gini =  ineq(frequency,type="Gini"))
 
-ggplot(gini, aes(y = gini,x = factor(day),fill = data.set)) + 
-  geom_bar(stat = 'identity',position = 'dodge') +
+png('C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\for_thesis\\gini_over_time_lienages.png',
+    type="cairo",    units="in", width=15, height=6, pointsize=12, res=500)    
+ggplot(gini %>% filter(data.set == 'pre.umi.freq'), aes(y = gini,x = factor(day))) + 
+  geom_bar(stat = 'identity',position = 'dodge', fill = hue_pal()(2)[2]) +
    ylab('Gini index\n') + 
   xlab('\nDay') + 
-  scale_fill_discrete(name="Pre or Post\nUMI processing",
-                      breaks=c("pre.umi.freq", "post.umi.freq"),
-                      labels=c("Pre UMI", "Post UMI")) +
+#   scale_fill_discrete(name="Pre or Post\nUMI processing",
+#                       breaks=c("pre.umi.freq", "post.umi.freq"),
+#                       labels=c("Pre UMI", "Post UMI")) +
   # guides(fill = guide_legend(title = "Pre or Post\nUMI processing")) +
-  theme_aviv + 
-  ggtitle('Gini index over time lineage B')  + facet_wrap(~lineage,nrow = 1)
+  theme_aviv +
+  facet_wrap(~lineage,nrow = 1)
   
+dev.off()

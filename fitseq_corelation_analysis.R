@@ -1,9 +1,9 @@
 require(dplyr)
 require(ineq)
 
-results.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\'
+results.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\no_umi_rerun\\'
 
-raw_data_location_2_mismatches = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\final_result_14-05-15-1551_2_mismatches.csv'
+raw_data_location_2_mismatches = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\final_match_count_14-05-15-1551_2_mismatches.csv'
 fitseq_raw_data_2_mismatches = read.csv(raw_data_location_2_mismatches,check.names=FALSE)
 colnames(fitseq_raw_data_2_mismatches)[1] = 'design'
 fitseq_raw_data_2_mismatches  <- fitseq_raw_data_2_mismatches  %>% select(-anc_2)
@@ -29,9 +29,10 @@ fitseq_spearman_distance_matrix_2_mismatches  <-  dist(1-cor(fitseq_raw_data_2_m
 
 fitseq_spearman_clustering_2_mismatches  <- hclust(fitseq_spearman_distance_matrix_2_mismatches,method = 'average')
 
-png(paste0(results.dir,'fitseq_spearman_upgma_clustering_2_mismatches.png'),units="in", width=20, height=10, res=100)
+png('C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\for_thesis\\fitseq_spearman_upgma_clustering_2_mismatches.png',
+        type="cairo",    units="in", width=14, height=6, pointsize=12, res=500)
 
-plot(fitseq_spearman_clustering_2_mismatches,main = 'Spearman correlation UPGMA dendrogram based on 2 mismatch data')
+plot(fitseq_spearman_clustering_2_mismatches,main = 'Sample correlation dendrogram based on Spearman and UPGMA')
 
 dev.off()
 
@@ -45,9 +46,10 @@ fitseq_pearson_distance_matrix_2_mismatches  <-  dist(1-cor(fitseq_raw_data_2_mi
 
 fitseq_pearson_clustering_2_mismatches  <- hclust(fitseq_pearson_distance_matrix_2_mismatches,method = 'average')
 
-png(paste0(results.dir,'fitseq_pearson_upgma_clustering_2_mismatches.png'),units="in", width=20, height=10, res=100)
+png('C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\for_thesis\\fitseq_pearson_upgma_clustering_2_mismatches.png',
+    type="cairo",    units="in", width=14, height=6, pointsize=12, res=500)
 
-plot(fitseq_pearson_clustering_2_mismatches,main = 'Pearson correlation UPGMA dendrogram based on 2 mismatch data')
+plot(fitseq_pearson_clustering_2_mismatches,main = 'Sample correlation dendrogram based on Pearson and UPGMA')
 
 dev.off()
 

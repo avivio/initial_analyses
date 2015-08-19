@@ -5,9 +5,9 @@ require(ggplot2)
 require(dplyr)
 
 
-result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\frequency_histograms_days\\'
+result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\no_umi_rerun\\frequency_histograms_days\\'
 
-fitseq.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\goodman_salis_tuller_fitseq_2_mismatch_with_0.csv'
+fitseq.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\fitseq_data_with_meta_no_umi_05_08.csv'
 summary.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\final_summary_14-05-15-1551.csv'
 fitseq.data = read.csv(fitseq.data.location)
 fitseq.data.tidy <- fitseq.data %>% select(-Count.A.DNA,-Count.A.RNA,-Count.B.DNA,-Count.B.RNA,
@@ -26,26 +26,24 @@ fitseq.data.tidy$RBS.Display <- factor(fitseq.data.tidy$RBS.Display,
 #historgrams of normalized frequency + 1 log transformed for different day, rbs-promoter groups, and lineages,
 fitseq.data.tidy  <- fitseq.data.tidy %>% 
   group_by(day,lineage) %>%
-  mutate(sum.freq_1 = sum(frequency+1),norm.freq_1 = (frequency+1)/sum.freq_1,
-         sum.freq = sum(frequency),norm.freq = (frequency)/sum.freq)
+  mutate(sum.sample= sum(frequency),norm.freq = frequency/sum.sample,
+         sum.anc= sum(anc_1),norm.anc = anc_1/sum.anc,freq.norm.anc = norm.freq/norm.anc,
+         sum.sample.1= sum(frequency+1),norm.freq.1 = (frequency+1)/sum.sample.1,
+         sum.anc.1= sum(anc_1+1),norm.anc.1 = (anc_1+1)/sum.anc.1,freq.norm.anc.1 = norm.freq.1/norm.anc.1)
 
 
 
 line.day.histogram   <- function(lineage_letter,days,fitseq.data.tidy){
   days_text  <- paste(days,collapse = ', ')
   png(paste0(result.dir,'days_fill_normalized_frequency_histograms_lineage_',lineage_letter,'_hist.png'),
-      units = 'i', width=15, height=12, res=70)
+      type="cairo",    units="in", width=10, height=6, pointsize=12, res=500)    
  p =  ggplot(filter(fitseq.data.tidy,day %in% days,lineage == lineage_letter,RBS.Display != 'WT') ,
-         aes(log2(norm.freq_1),fill = factor(day)))  +
+         aes(log2(freq.norm.anc.1),fill = factor(day)))  +
    stat_bin(geom='area',position = 'identity',alpha=.5) +
    theme_minimal() + 
     facet_grid(RBS.Display~Promoter.Display)  +
-   theme( axis.line = element_line(colour = "black"),axis.text=element_text(size=14),
-          axis.title=element_text(size=16,face="bold"), legend.text=element_text(size=14),
-          legend.title=element_text(size=16,face="bold"),plot.title = element_text(size = 25,face = "bold"),
-          strip.text.x = element_text(size=16,face="bold"),strip.text.y = element_text(size=16,face="bold")) +
+   theme_aviv +
    guides(color = guide_legend("Day"),fill = guide_legend("Day")) +
-   ggtitle(paste0('Normalized frequency distribution of days ', days_text, ' for lineage ', lineage_letter,'\n')) +
    xlab('\nLog 2 of normalized frequency + 1') +
    ylab('Count\n') +
    expand_limits(y=900)
@@ -59,21 +57,18 @@ line.day.histogram   <- function(lineage_letter,days,fitseq.data.tidy){
 line.rbs.histogram   <- function(lineage_letter,days,fitseq.data.tidy){
   days_text  <- paste(days,collapse = ', ')
   png(paste0(result.dir,'rbs_fill_normalized_frequency_histograms_lineage_',lineage_letter,'.png'),
-      units = 'i', width=15, height=12, res=70)
+      type="cairo",    units="in", width=9, height=11, pointsize=12, res=500)    
   p =  ggplot(filter(fitseq.data.tidy,day %in% days,lineage == lineage_letter,RBS.Display != 'WT') ,
-              aes(log2(norm.freq_1),fill = factor(RBS.Display)))  +
+              aes(log2(freq.norm.anc.1),fill = factor(RBS.Display)))  +
     stat_bin(geom='area',position = 'identity',alpha=.5) +
     theme_minimal() + 
     facet_grid(day~Promoter.Display)  +
-    theme( axis.line = element_line(colour = "black"),axis.text=element_text(size=14),
-           axis.title=element_text(size=16,face="bold"), legend.text=element_text(size=14),
-           legend.title=element_text(size=16,face="bold"),plot.title = element_text(size = 25,face = "bold"),
-           strip.text.x = element_text(size=16,face="bold"),strip.text.y = element_text(size=16,face="bold")) +
+    theme_aviv +
     guides(color = guide_legend("Day"),fill = guide_legend("RBS")) +
-    ggtitle(paste0('Normalized frequency distribution of days ', days_text, ' for lineage ', lineage_letter,'\n')) +
     xlab('\nLog 2 of normalized frequency + 1') +
     ylab('Count\n') +
-    expand_limits(y=900)
+    expand_limits(y=1500) +
+    coord_cartesian(xlim = c(-5,5))
   
   print(p)
   dev.off()
@@ -86,7 +81,7 @@ for (lineage in c('A','B','C','D','E','F')){
 }
 
 for (lineage in c('A','B','C','D','E','F')){
-  line.rbs.histogram(lineage,c(4,12,28),fitseq.data.tidy)
+  line.rbs.histogram(lineage,c(4,8,12,16,20,24,28),fitseq.data.tidy)
   
 }
 

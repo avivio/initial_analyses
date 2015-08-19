@@ -4,18 +4,28 @@ require(Peptides)
 
 get.peptide.stats <- function(sequence){
   data(aacost)
+  aademand  <- read.csv('C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\aa_demand.csv')
 pep.properties <- list()
 
 sequence.split <- strsplit(sequence, "")[[1]]
 tot.cost = 0
+tot.demand = 0
+
 for (aa in sequence.split){
-  cost = aacost[which(aacost[,2] == aa),'tot']
+  cost = aacost[aacost[,2] == aa,'tot']
   tot.cost = cost + tot.cost
+  demand = aademand[aademand$aa == aa,'demand']
+  tot.demand = demand + tot.demand
+  
 }
+
+
+
 stats <- AAstat(sequence.split,FALSE)
 
 pep.properties$pep.pi <- stats[[3]]
 pep.properties$pep.cost <- tot.cost
+pep.properties$pep.demand <- tot.demand
 pep.properties$pep.mw <- mw(sequence)
 pep.properties$pep.aindex <- aindex(sequence)
 pep.properties$pep.boman <- boman(sequence)
@@ -60,6 +70,7 @@ fitseq.data.with.pep.data <-  transform(fitseq.data.with.pep.data, Prot = as.num
                        pep.sequence = as.character(pep.sequence),
                        pep.pi=as.numeric(pep.pi),
                        pep.cost=as.numeric(pep.cost),
+                       pep.demand=as.numeric(pep.demand),
                        pep.mw=as.numeric(pep.mw),
                        pep.aindex=as.numeric(pep.aindex),
                        pep.boman=as.numeric(pep.boman),
