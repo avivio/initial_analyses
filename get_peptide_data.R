@@ -109,3 +109,43 @@ fitseq.data.with.pep.data <-  transform(fitseq.data.with.pep.data, Prot = as.num
                        pep.non.polar=as.numeric(pep.non.polar))
 write.csv(fitseq.data.with.pep.data,
           file = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\pep_data_goodman_salis_tuller_fitseq_2_mismatch_with_0.csv')
+
+
+
+
+
+aggregation <- read.csv('C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\aa_aggregation_stats.csv', row.names = 1)
+
+
+
+get_agg_data <- function(pep){
+  
+  pep_df = data.frame(unlist(strsplit(pep,'')))
+  names(pep_df) <- 'aa'
+  
+  pep_df <- pep_df %>% mutate(levy = aggregation[aa,'levy_agg_prop'],aggrescan = aggregation[aa,'aggrescan'],
+                              foldamyloid = aggregation[aa,'foldamyloid'],ww_hydrophobicity = aggregation[aa,'ww_hydrophobicity'])
+  pep_sum <- pep_df %>% summarise(levy_mean = mean(levy),levy_median = median(levy),levy_stdev = sd(levy),levy_sum = sum(levy),
+                                  aggrescan_mean = mean(aggrescan),aggrescan_median = median(aggrescan),aggrescan_stdev = sd(aggrescan),aggrescan_sum = sum(aggrescan),
+                                  foldamyloid_mean = mean(foldamyloid),foldamyloid_median = median(foldamyloid),foldamyloid_stdev = sd(foldamyloid),foldamyloid_sum = sum(foldamyloid),
+                                  ww_hydrophobicity_mean = mean(ww_hydrophobicity),ww_hydrophobicity_median = median(ww_hydrophobicity),ww_hydrophobicity_stdev = sd(ww_hydrophobicity),ww_hydrophobicity_sum = sum(ww_hydrophobicity))
+  
+  
+  
+  # pep_sum$instability <- instaindex(pep)
+  return(pep_sum)
+}
+pep <- 'MSLNFLDFEQP'
+get_agg_data(pep)
+pep <- 'MSLNFLDFEQP'
+peps <- read.csv('C://Users//dell7//Documents//Tzachi//workspace//data//peptide_amino_acid_sequences.csv')
+l <- lapply(as.character(peps$sequence),get_agg_data)
+df <- data.frame(peps, do.call(rbind, l))
+df <- transform(df, Gene = as.character(Gene))
+
+fitseq_genes <- read.csv('C://Users//dell7//Documents//Tzachi//workspace//data//id_gene.csv')
+fitseq_genes <- transform(fitseq_genes, Gene = as.character(Gene))
+
+fitseq_genes_agg_data <- left_join(fitseq_genes,df, by = 'Gene' )
+
+write.csv(fitseq_genes_agg_data,'C://Users//dell7//Documents//Tzachi//workspace//data//design_agg_data.csv', row.names = F)

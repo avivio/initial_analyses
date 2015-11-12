@@ -7,7 +7,7 @@ require(tidyr)
 
 results.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\no_umi_rerun'
 
-summary_data_location = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\final_summary_14-05-15-1551.csv'
+summary_data_location = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\final_summary_generations.csv'
 summary_data = t(read.csv(summary_data_location,check.names=FALSE,row.names = 1,as.is = T))
 summary_data <- transform(summary_data,
           all_reads = as.numeric(as.character(all_reads)),
@@ -32,7 +32,7 @@ summary_data <- transform(summary_data,
           design_count_pre_umi_all = as.numeric(as.character(design_count_pre_umi_all)),
           design_count_post_umi_all = as.numeric(as.character(design_count_post_umi_all)),
           lineage = as.character(lineage),
-          day = as.numeric(as.character(day))
+          generation = as.numeric(as.character(generation))
 )
           
 
@@ -77,13 +77,16 @@ summary_data %>% mutate(found_design_perc = found_designs_1_mismatches/14234 )  
   add_axis("y", title = "found designs percent from library 2 mismatches)", title_offset = 75)
 
  summary_data_design_coverage_2_mismatches <- summary_data %>% mutate(found_design_perc = found_designs_2_mismatches/14234 )  
+ summary_data_design_coverage_2_mismatches$lineage <- factor(summary_data_design_coverage_2_mismatches$lineage,
+                                    levels = c("Ancestor", "A", "B", "C", "D", "E", "F"))
  
 png('C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\for_thesis\\percent_of_library_covered_over_time.png',
     type="cairo",    units="in", width=10, height=6, pointsize=12, res=500)    
-ggplot(summary_data_design_coverage_2_mismatches, aes(x = day,y = found_design_perc, color = lineage)) + 
+ggplot(summary_data_design_coverage_2_mismatches, aes(x = generation,y = found_design_perc, color = lineage)) + 
   geom_point(size = 3) +
-  xlab("Days") +
+  xlab("Generations") +
   ylab("Percent of library covered") + 
+  scale_x_continuous(breaks=c(0, 28, 56, 84, 112,140,168,196)) +
   theme_aviv
 
 dev.off()

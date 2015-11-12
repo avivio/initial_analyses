@@ -259,7 +259,7 @@ fitseq.data.residuals.above.14  %>%
 
 
 
-base.result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\no_umi_rerun\\fitness_residuals\\'
+base.result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\aggregation\\fitness_residuals\\'
 base.result.dir= paste0(base.result.dir,data.set.name,'\\')
 dir.create(base.result.dir)
 names(labels) <- variables

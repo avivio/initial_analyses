@@ -7,7 +7,7 @@ require(dplyr)
 
 result.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\no_umi_rerun\\frequency_histograms_days\\'
 
-fitseq.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\fitseq_data_with_meta_no_umi_05_08.csv'
+fitseq.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\fitseq_data_with_meta_no_umi_generations.csv'
 summary.data.location  <- 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\final_summary_14-05-15-1551.csv'
 fitseq.data = read.csv(fitseq.data.location)
 fitseq.data.tidy <- fitseq.data %>% select(-Count.A.DNA,-Count.A.RNA,-Count.B.DNA,-Count.B.RNA,
@@ -18,14 +18,17 @@ fitseq.data.tidy <- fitseq.data %>% select(-Count.A.DNA,-Count.A.RNA,-Count.B.DN
                                                 -Bin.Pct.11,-Bin.Pct.12,-Insuff.Prot,-Insuff.DNA,
                                                 -Insuff.RNA,-Fltr.BelowRange,-Fltr.AboveRange ,
                                                 -Fltr.SetGood,-full.seq)
-fitseq.data.tidy  <- fitseq.data.tidy %>%   gather(sample, frequency, A_24:F_0)
-fitseq.data.tidy  <- fitseq.data.tidy %>% separate(sample, c("lineage", "day"), '_',convert = T)
+fitseq.data.tidy  <- fitseq.data.tidy %>%   gather(sample, frequency, A_168:F_0)
+fitseq.data.tidy  <- fitseq.data.tidy %>% separate(sample, c("lineage", "generation"), '_',convert = T)
 fitseq.data.tidy$RBS.Display <- factor(fitseq.data.tidy$RBS.Display,
                               levels = c("Strong", "Mid", "Weak", "WT"))
+fitseq.data.tidy$lineage <- factor(fitseq.data.tidy$lineage,
+                                       levels = c("Ancestor", "A", "B", "C", "D", "E", "F"))
+
 
 #historgrams of normalized frequency + 1 log transformed for different day, rbs-promoter groups, and lineages,
 fitseq.data.tidy  <- fitseq.data.tidy %>% 
-  group_by(day,lineage) %>%
+  group_by(generation,lineage) %>%
   mutate(sum.sample= sum(frequency),norm.freq = frequency/sum.sample,
          sum.anc= sum(anc_1),norm.anc = anc_1/sum.anc,freq.norm.anc = norm.freq/norm.anc,
          sum.sample.1= sum(frequency+1),norm.freq.1 = (frequency+1)/sum.sample.1,
@@ -54,21 +57,22 @@ line.day.histogram   <- function(lineage_letter,days,fitseq.data.tidy){
 }
 
 
-line.rbs.histogram   <- function(lineage_letter,days,fitseq.data.tidy){
-  days_text  <- paste(days,collapse = ', ')
-  png(paste0(result.dir,'rbs_fill_normalized_frequency_histograms_lineage_',lineage_letter,'.png'),
+line.rbs.histogram   <- function(lineage_letter,generations,fitseq.data.tidy){
+  generations_text  <- paste(generations,collapse = ', ')
+  levels(fitseq.data.tidy$Promoter.Display) <- c("High promoter", "Low promoter")
+  png(paste0(result.dir,'rbs_fill_frequency_histograms_lineage_',lineage_letter,'.png'),
       type="cairo",    units="in", width=9, height=11, pointsize=12, res=500)    
-  p =  ggplot(filter(fitseq.data.tidy,day %in% days,lineage == lineage_letter,RBS.Display != 'WT') ,
-              aes(log2(freq.norm.anc.1),fill = factor(RBS.Display)))  +
+  p =  ggplot(filter(fitseq.data.tidy,generation %in% generations,lineage == lineage_letter,RBS.Display != 'WT') ,
+              aes(log2(norm.freq.1),fill = factor(RBS.Display)))  +
     stat_bin(geom='area',position = 'identity',alpha=.5) +
     theme_minimal() + 
-    facet_grid(day~Promoter.Display)  +
+    facet_grid(generation~Promoter.Display)  +
     theme_aviv +
-    guides(color = guide_legend("Day"),fill = guide_legend("RBS")) +
-    xlab('\nLog 2 of normalized frequency + 1') +
-    ylab('Count\n') +
-    expand_limits(y=1500) +
-    coord_cartesian(xlim = c(-5,5))
+    guides(color = guide_legend("Generation"),fill = guide_legend("RBS")) +
+    xlab('\nLog 2 frequency') +
+    ylab('# designs\n') +
+    expand_limits(y=1000) +
+    coord_cartesian(xlim = c(-24,-10))
   
   print(p)
   dev.off()
@@ -81,7 +85,7 @@ for (lineage in c('A','B','C','D','E','F')){
 }
 
 for (lineage in c('A','B','C','D','E','F')){
-  line.rbs.histogram(lineage,c(4,8,12,16,20,24,28),fitseq.data.tidy)
+  line.rbs.histogram(lineage,c(28,56,84,112,140,168,196),fitseq.data.tidy)
   
 }
 

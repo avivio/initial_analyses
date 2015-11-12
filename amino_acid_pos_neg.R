@@ -121,6 +121,9 @@ cost_cor_rbs <- pos_neg_amino_acids_rbs %>%
 cost_cor_strings_rbs <- cost_cor_rbs$cor_string
 names(cost_cor_strings_rbs) <- cost_cor_rbs$RBS_Display
 
+png('C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\for_thesis\\amino_acid_ratio_vs_cost_rbs.png',
+    type="cairo",    units="in", width=25, height=10, pointsize=12, res=500)  
+
 ggplot(pos_neg_amino_acids_rbs %>% filter(day == 12),
        aes(y= ratio,x=cost)) +
   geom_point(size = 5) + 
@@ -128,9 +131,9 @@ ggplot(pos_neg_amino_acids_rbs %>% filter(day == 12),
   geom_text(aes(label=paste(' ',amino_acid)),hjust=0, vjust=0) +
   geom_smooth(method = 'lm')  +
   ylab('Ration of Positive amino acid frequency over Negative') +
-  facet_grid(~RBS_Display) +
-  geom_text (aes(label = cost_cor_strings_rbs[RBS_Display]), x = Inf, y = Inf, hjust = 1, vjust = 1, face = 'bold', color = 'blue'  )
-
+  facet_grid(~RBS_Display) 
+  # geom_text (aes(label = cost_cor_strings_rbs[RBS_Display]), x = Inf, y = Inf, hjust = 1, vjust = 1, face = 'bold', color = 'blue'  )
+dev.off()
 
 #demand plots
 pos_neg_lim <- max(c(max(pos_neg_amino_acids$Positive),max(pos_neg_amino_acids$Negative)))

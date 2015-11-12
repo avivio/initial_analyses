@@ -1,12 +1,11 @@
 require(dplyr)
 require(ineq)
-
+require(dendextend)
 results.dir = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\no_umi_rerun\\'
 
-raw_data_location_2_mismatches = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\clean_data\\final_match_count_14-05-15-1551_2_mismatches.csv'
+raw_data_location_2_mismatches = 'C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\data\\match_count_2_mismatches_generations.csv'
 fitseq_raw_data_2_mismatches = read.csv(raw_data_location_2_mismatches,check.names=FALSE)
 colnames(fitseq_raw_data_2_mismatches)[1] = 'design'
-fitseq_raw_data_2_mismatches  <- fitseq_raw_data_2_mismatches  %>% select(-anc_2)
 fitseq_raw_data_mat_2_mismatches  <- data.matrix(fitseq_raw_data_2_mismatches %>% select(-design))
 fitseq_raw_data_norm_2_mismatches  <- data.frame(sweep(fitseq_raw_data_mat_2_mismatches,2,colSums(fitseq_raw_data_mat_2_mismatches),`/`))
 fitseq_raw_data_norm_log1p_2_mismatches  <- data.frame(log10(sweep(fitseq_raw_data_mat_2_mismatches+1,2,colSums(fitseq_raw_data_mat_2_mismatches+1),`/`)))
@@ -22,17 +21,32 @@ fitseq_raw_data_norm_0_mismatches  <- data.frame(sweep(fitseq_raw_data_mat_0_mis
 fitseq_raw_data_norm_log1p_0_mismatches  <- data.frame(log10(sweep(fitseq_raw_data_mat_0_mismatches+1,2,colSums(fitseq_raw_data_mat_0_mismatches+1),`/`)))
 
 
+lineage_colors <- hue_pal()(7)
+names(lineage_colors) <- c('Ancestor', 'A', 'B', 'C', 'D', 'E', 'F')
+
+generation_colors <- hue_pal()(8)
+names(generation_colors) <- seq(0,196,28)
+generation_colors["0"] <- lineage_colors['Ancestor']
+
 #clustering 2 mismatches
 #spearman
 
 fitseq_spearman_distance_matrix_2_mismatches  <-  dist(1-cor(fitseq_raw_data_2_mismatches %>% select(-design) , method = "spearman"))
 
 fitseq_spearman_clustering_2_mismatches  <- hclust(fitseq_spearman_distance_matrix_2_mismatches,method = 'average')
+spearman.dend <- as.dendrogram(fitseq_spearman_clustering_2_mismatches)
+
+branch.col <- lineage_colors[as.character(t(as.data.frame(strsplit(names(fitseq_raw_data_2_mismatches)[-1][order.dendrogram(spearman.dend)],'_'))[1,]))]
+spearman.dend <- color_branches(spearman.dend,col =branch.col )
+
+labels_colors(spearman.dend) <- generation_colors[as.character(t(as.data.frame(strsplit(names(fitseq_raw_data_2_mismatches)[-1][order.dendrogram(spearman.dend)],'_'))[2,]))]
+
+spearman.dend <- set(spearman.dend, 'branches_lwd',3)
 
 png('C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\for_thesis\\fitseq_spearman_upgma_clustering_2_mismatches.png',
         type="cairo",    units="in", width=14, height=6, pointsize=12, res=500)
 
-plot(fitseq_spearman_clustering_2_mismatches,main = 'Sample correlation dendrogram based on Spearman and UPGMA')
+plot(spearman.dend)
 
 dev.off()
 
@@ -46,10 +60,18 @@ fitseq_pearson_distance_matrix_2_mismatches  <-  dist(1-cor(fitseq_raw_data_2_mi
 
 fitseq_pearson_clustering_2_mismatches  <- hclust(fitseq_pearson_distance_matrix_2_mismatches,method = 'average')
 
+pearson.dend <- as.dendrogram(fitseq_pearson_clustering_2_mismatches)
+
+branch.col <- lineage_colors[as.character(t(as.data.frame(strsplit(names(fitseq_raw_data_2_mismatches)[-1][order.dendrogram(pearson.dend)],'_'))[1,]))]
+pearson.dend <- color_branches(pearson.dend,col =branch.col )
+
+labels_colors(pearson.dend) <- generation_colors[as.character(t(as.data.frame(strsplit(names(fitseq_raw_data_2_mismatches)[-1][order.dendrogram(pearson.dend)],'_'))[2,]))]
+pearson.dend <- set(pearson.dend, 'branches_lwd',3)
+
 png('C:\\Users\\dell7\\Documents\\Tzachi\\workspace\\results\\for_thesis\\fitseq_pearson_upgma_clustering_2_mismatches.png',
     type="cairo",    units="in", width=14, height=6, pointsize=12, res=500)
 
-plot(fitseq_pearson_clustering_2_mismatches,main = 'Sample correlation dendrogram based on Pearson and UPGMA')
+plot(pearson.dend)
 
 dev.off()
 
